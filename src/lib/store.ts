@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-export type HotspotId = "sofa" | "desk" | "bar" | "library" | null;
+export type HotspotId = "flask" | "combRail" | "bolster" | "emberLine" | "shadowChamber" | "columnChamber" | "atmosphereMist" | null;
 
 interface HavenStore {
   selectedHotspot: HotspotId;

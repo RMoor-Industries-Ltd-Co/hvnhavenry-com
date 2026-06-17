@@ -9,10 +9,13 @@ import { RoomLighting } from "./RoomLighting";
 import { Hotspot } from "./Hotspot";
 
 const HOTSPOTS = [
-  { id: "sofa" as const, position: [0, 1.35, 1.5] as [number, number, number], label: "The Meridian Chaise" },
-  { id: "desk" as const, position: [3.0, 1.5, 0.5] as [number, number, number], label: "The Obsidian Bureau" },
-  { id: "bar" as const, position: [3.2, 1.8, -3.2] as [number, number, number], label: "The Founders Bar" },
-  { id: "library" as const, position: [0, 2.6, -4.4] as [number, number, number], label: "The Grand Library Wall" },
+  { id: "combRail" as const,      position: [-0.15, 0.95, -0.5]  as [number, number, number], label: "Comb Rail Diffuser" },
+  { id: "shadowChamber" as const, position: [0.55,  0.95, -0.5]  as [number, number, number], label: "Shadow Chamber" },
+  { id: "flask" as const,         position: [2.05,  1.15,  1.2]  as [number, number, number], label: "Framing Mist Flask" },
+  { id: "atmosphereMist" as const,position: [-2.05, 1.15,  1.05] as [number, number, number], label: "Atmosphere Mist" },
+  { id: "bolster" as const,       position: [1.1,   1.2,   0.9]  as [number, number, number], label: "Repose Bolster" },
+  { id: "columnChamber" as const, position: [5.0,   2.1,  -2.5]  as [number, number, number], label: "Column Chamber" },
+  { id: "emberLine" as const,     position: [3.5,   1.75, -4.0]  as [number, number, number], label: "Ember Line Incense" },
 ];
 
 function SceneReady() {

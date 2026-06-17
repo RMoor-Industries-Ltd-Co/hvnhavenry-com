@@ -396,6 +396,274 @@ function AreaRug() {
   );
 }
 
+// ── HVN Products ──────────────────────────────────────────────────────────────
+
+function CombRailDiffuser() {
+  // Dark glass vessel + brass comb rail on the coffee table
+  return (
+    <group position={[0, 0.395, -0.5]}>
+      {/* Glass vessel */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.085, 0.085, 0.18, 16]} />
+        <meshStandardMaterial color="#0d0d10" roughness={0.05} metalness={0.2} transparent opacity={0.88} />
+      </mesh>
+      {/* Brass rail base */}
+      <mesh position={[0, 0.105, 0]} castShadow>
+        <boxGeometry args={[0.16, 0.022, 0.032]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {/* Blade reeds (5) */}
+      {[-0.056, -0.028, 0, 0.028, 0.056].map((x, i) => (
+        <mesh key={i} position={[x, 0.26, 0]} castShadow>
+          <boxGeometry args={[0.009, 0.28, 0.003]} />
+          <meshStandardMaterial color="#1a1a1c" roughness={0.6} metalness={0.3} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function FlaskSprayer() {
+  // Vintage oval flask on the right side table — Obsidian finish
+  return (
+    <group position={[2.05, 0.62, 1.2]} rotation={[0, 0.4, 0]}>
+      {/* Oval flask body */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.11, 16]} />
+        <meshStandardMaterial color="#1a1a1c" roughness={0.55} metalness={0.4} />
+      </mesh>
+      {/* Flatten to oval using scale on parent handled by shape — neck */}
+      <mesh position={[0, 0.085, 0]} castShadow>
+        <cylinderGeometry args={[0.018, 0.028, 0.06, 10]} />
+        <meshStandardMaterial color="#2a2820" roughness={0.35} metalness={0.7} />
+      </mesh>
+      {/* Spray nozzle cap */}
+      <mesh position={[0, 0.125, 0]} castShadow>
+        <cylinderGeometry args={[0.016, 0.016, 0.025, 10]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {/* Chain link suggestion */}
+      <mesh position={[0.04, 0.06, 0]} rotation={[0, 0, Math.PI / 4]} castShadow>
+        <torusGeometry args={[0.012, 0.003, 6, 12]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {/* HVN engraving plane (dark) */}
+      <mesh position={[0, 0, 0.056]}>
+        <planeGeometry args={[0.06, 0.04]} />
+        <meshStandardMaterial color="#c9a96e" emissive="#c9a96e" emissiveIntensity={0.15} roughness={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+function ReposeBolster() {
+  // Cylindrical bolster cushion on sofa armrest
+  return (
+    <group position={[1.1, 0.65, 0.9]} rotation={[0, 0, Math.PI / 2]}>
+      {/* Bolster body */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 0.38, 16]} />
+        <meshStandardMaterial color="#202022" roughness={0.96} />
+      </mesh>
+      {/* End caps */}
+      {[-0.19, 0.19].map((y, i) => (
+        <mesh key={i} position={[0, y, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.09, 0.008, 16]} />
+          <meshStandardMaterial color="#1a1a1c" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* Brass HVN plate on end */}
+      <mesh position={[0, 0.196, 0]}>
+        <boxGeometry args={[0.04, 0.002, 0.025]} />
+        <primitive object={M.brass} />
+      </mesh>
+    </group>
+  );
+}
+
+function EmberLineIncense() {
+  const smokeRef = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    if (smokeRef.current) {
+      smokeRef.current.position.y = 0.55 + Math.sin(state.clock.elapsedTime * 0.8) * 0.02;
+      smokeRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      (smokeRef.current.material as THREE.MeshStandardMaterial).opacity =
+        0.06 + Math.sin(state.clock.elapsedTime * 1.2) * 0.02;
+    }
+  });
+
+  return (
+    <group position={[3.5, 1.2, -4.0]}>
+      {/* HVN box */}
+      <mesh position={[0, 0, 0]} castShadow>
+        <boxGeometry args={[0.22, 0.04, 0.1]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.8} />
+      </mesh>
+      {/* Box lid slightly open */}
+      <mesh position={[0.06, 0.025, 0]} rotation={[0, 0, -0.3]} castShadow>
+        <boxGeometry args={[0.1, 0.006, 0.1]} />
+        <meshStandardMaterial color="#111111" roughness={0.8} />
+      </mesh>
+      {/* Incense sticks in holder */}
+      <mesh position={[0, 0.035, 0.02]} castShadow>
+        <boxGeometry args={[0.05, 0.01, 0.01]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {[0, 0.008, -0.008].map((z, i) => (
+        <mesh key={i} position={[0.01 - i * 0.01, 0.2, 0.02 + z]} rotation={[0.05, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.002, 0.002, 0.32, 6]} />
+          <meshStandardMaterial color="#2a1a08" roughness={0.85} />
+        </mesh>
+      ))}
+      {/* Ember tip glow */}
+      <mesh position={[0, 0.36, 0.02]}>
+        <sphereGeometry args={[0.005, 6, 6]} />
+        <meshStandardMaterial color="#ff6020" emissive="#ff4010" emissiveIntensity={3} />
+      </mesh>
+      {/* Rising smoke wisp */}
+      <mesh ref={smokeRef} position={[0, 0.45, 0.02]}>
+        <planeGeometry args={[0.04, 0.12]} />
+        <meshStandardMaterial
+          color="#c0c0c8"
+          transparent
+          opacity={0.07}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Incense light */}
+      <pointLight position={[0, 0.4, 0.02]} intensity={0.3} color="#ff6020" distance={1.2} decay={2} />
+    </group>
+  );
+}
+
+function ShadowChamberCandle() {
+  const lightRef = useRef<THREE.PointLight>(null);
+  useFrame((state) => {
+    if (lightRef.current) {
+      const t = state.clock.elapsedTime;
+      lightRef.current.intensity = 0.7 + Math.sin(t * 6.8) * 0.15 + Math.sin(t * 12.3) * 0.05;
+    }
+  });
+
+  return (
+    <group position={[0.55, 0.395, -0.5]}>
+      {/* Outer body — dark volcanic composite */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.058, 0.058, 0.13, 16]} />
+        <meshStandardMaterial color="#18140f" roughness={0.92} metalness={0.05} />
+      </mesh>
+      {/* Inner glow core — seen through channel cuts */}
+      <mesh>
+        <cylinderGeometry args={[0.035, 0.035, 0.11, 10]} />
+        <meshStandardMaterial color="#ff8820" emissive="#ff6600" emissiveIntensity={1.2} roughness={0.9} transparent opacity={0.75} />
+      </mesh>
+      {/* Cut channel markers — 4 vertical dark planes suggesting deep cuts */}
+      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((rot, i) => (
+        <group key={i} rotation={[0, rot, 0]}>
+          <mesh position={[0.058, 0, 0]}>
+            <boxGeometry args={[0.004, 0.14, 0.014]} />
+            <meshStandardMaterial color="#080604" roughness={0.95} />
+          </mesh>
+        </group>
+      ))}
+      {/* Flame */}
+      <mesh position={[0, 0.078, 0]}>
+        <sphereGeometry args={[0.007, 6, 6]} />
+        <meshStandardMaterial color="#ffdd44" emissive="#ff9900" emissiveIntensity={6} />
+      </mesh>
+      {/* Brass base ring */}
+      <mesh position={[0, -0.068, 0]} castShadow>
+        <cylinderGeometry args={[0.066, 0.066, 0.007, 16]} />
+        <primitive object={M.brass} />
+      </mesh>
+      <pointLight ref={lightRef} position={[0, 0.05, 0]} intensity={0.7} color="#ff8020" distance={2.8} decay={2} castShadow />
+    </group>
+  );
+}
+
+function ColumnChamberCandle() {
+  const flameRef = useRef<THREE.Mesh>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (flameRef.current) {
+      flameRef.current.scale.y = 1 + Math.sin(t * 9.1) * 0.1;
+      flameRef.current.position.x = Math.sin(t * 5.7) * 0.002;
+    }
+    if (lightRef.current) {
+      lightRef.current.intensity = 0.55 + Math.sin(t * 7.4) * 0.12;
+    }
+  });
+
+  return (
+    <group position={[5.0, 1.65, -2.5]}>
+      {/* Tall column body */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.038, 0.038, 0.28, 14]} />
+        <meshStandardMaterial color="#1c1814" roughness={0.88} />
+      </mesh>
+      {/* Slight taper at crown */}
+      <mesh position={[0, 0.155, 0]} castShadow>
+        <cylinderGeometry args={[0.024, 0.038, 0.03, 14]} />
+        <meshStandardMaterial color="#1c1814" roughness={0.88} />
+      </mesh>
+      {/* Flame */}
+      <mesh ref={flameRef} position={[0, 0.178, 0]}>
+        <coneGeometry args={[0.007, 0.018, 8]} />
+        <meshStandardMaterial color="#ffdd55" emissive="#ff9900" emissiveIntensity={5} transparent opacity={0.9} />
+      </mesh>
+      <mesh position={[0, 0.172, 0]}>
+        <sphereGeometry args={[0.005, 6, 6]} />
+        <meshStandardMaterial color="#ffee66" emissive="#ffcc00" emissiveIntensity={7} />
+      </mesh>
+      {/* Brass base */}
+      <mesh position={[0, -0.143, 0]} castShadow>
+        <cylinderGeometry args={[0.046, 0.046, 0.006, 14]} />
+        <primitive object={M.brass} />
+      </mesh>
+      <pointLight ref={lightRef} position={[0, 0.2, 0]} intensity={0.55} color="#ff9040" distance={2} decay={2} />
+    </group>
+  );
+}
+
+function AtmosphereMist() {
+  return (
+    <group position={[-2.05, 0.63, 1.05]} rotation={[0, 0.8, 0]}>
+      {/* Vessel body — matte black glass */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.04, 0.042, 0.175, 14]} />
+        <meshStandardMaterial color="#0d0d10" roughness={0.08} metalness={0.25} />
+      </mesh>
+      {/* Shoulder taper */}
+      <mesh position={[0, 0.098, 0]} castShadow>
+        <cylinderGeometry args={[0.024, 0.04, 0.025, 14]} />
+        <meshStandardMaterial color="#0d0d10" roughness={0.08} metalness={0.25} />
+      </mesh>
+      {/* Brass pump collar */}
+      <mesh position={[0, 0.114, 0]} castShadow>
+        <cylinderGeometry args={[0.024, 0.024, 0.014, 12]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {/* Pump stem */}
+      <mesh position={[0, 0.138, 0]} castShadow>
+        <cylinderGeometry args={[0.007, 0.007, 0.036, 8]} />
+        <primitive object={M.brass} />
+      </mesh>
+      {/* Spray head */}
+      <mesh position={[0, 0.158, 0]} castShadow>
+        <boxGeometry args={[0.034, 0.018, 0.022]} />
+        <meshStandardMaterial color="#1a1a1e" roughness={0.5} metalness={0.3} />
+      </mesh>
+      {/* HVN label */}
+      <mesh position={[0, -0.01, 0.043]}>
+        <planeGeometry args={[0.055, 0.08]} />
+        <meshStandardMaterial color="#c9a96e" emissive="#c9a96e" emissiveIntensity={0.12} roughness={0.85} />
+      </mesh>
+    </group>
+  );
+}
+
 function CandleFlicker() {
   const refs = useRef<THREE.PointLight[]>([]);
   useFrame((state) => {
@@ -441,6 +709,14 @@ export function RoomGeometry() {
       <ShelvingWall />
       <AreaRug />
       <CandleFlicker />
+      {/* HVN Products */}
+      <CombRailDiffuser />
+      <FlaskSprayer />
+      <ReposeBolster />
+      <EmberLineIncense />
+      <ShadowChamberCandle />
+      <ColumnChamberCandle />
+      <AtmosphereMist />
     </group>
   );
 }
