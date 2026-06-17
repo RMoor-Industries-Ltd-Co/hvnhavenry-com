@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant);
+  --color-haven-gold: #c9a96e;
+  --color-haven-cream: #e8dcc8;
+  --color-haven-dark: #0d0b09;
+  --color-haven-mahogany: #2a1810;
+  --color-haven-velvet: #1a1035;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background-color: #0d0b09;
+  color: #e8dcc8;
+  overflow-x: hidden;
+}
+
+/* Luxury scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0b09;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9a96e;
+  border-radius: 2px;
+}
+
+/* Typography */
+.font-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+/* Hotspot pulse animation */
+@keyframes hotspot-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes hotspot-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s ease forwards;
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #c9a96e 0%,
+    #f0d898 40%,
+    #c9a96e 60%,
+    #8b6914 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Loading screen */
+.loading-bar {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+  animation: shimmer 1.5s ease infinite;
+  background-size: 200% auto;
+}
+
+/* Parallax section glass card */
+.glass-card {
+  background: rgba(13, 11, 9, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+}
