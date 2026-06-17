@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
+import { LandscapeGate } from "@/components/ui/LandscapeGate";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="bg-[#0d0b09] text-[#e8dcc8] antialiased overflow-x-hidden">
-        {children}
+        <LandscapeGate>{children}</LandscapeGate>
       </body>
     </html>
   );

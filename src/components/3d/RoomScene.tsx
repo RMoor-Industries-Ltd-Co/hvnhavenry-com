@@ -84,6 +84,7 @@ export function RoomScene({ onHotspotSelect }: RoomSceneProps) {
       <OrbitControls
         enablePan={false}
         enableZoom={true}
+        zoomSpeed={0.8}
         minDistance={3}
         maxDistance={9}
         minPolarAngle={Math.PI * 0.15}
@@ -93,6 +94,10 @@ export function RoomScene({ onHotspotSelect }: RoomSceneProps) {
         target={[0, 1.5, 0]}
         autoRotate
         autoRotateSpeed={0.4}
+        touches={{
+          ONE: 2,   // ONE finger = ROTATE (THREE.TOUCH.ROTATE = 2)
+          TWO: 1,   // TWO fingers = DOLLY/zoom (THREE.TOUCH.DOLLY_ROTATE = 1)
+        }}
       />
     </Canvas>
   );
