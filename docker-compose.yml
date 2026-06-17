@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    container_name: hvnhavenry_app
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file:
+      - .env.local
+    networks:
+      - havenry
+
+  nginx:
+    image: nginx:alpine
+    container_name: hvnhavenry_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - app
+    networks:
+      - havenry
+
+networks:
+  havenry:
+    driver: bridge
