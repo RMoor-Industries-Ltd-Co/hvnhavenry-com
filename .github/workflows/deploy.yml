@@ -1,0 +1,31 @@
+name: Deploy to Calculus-Havenry
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USER }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          script: |
+            set -e
+            cd /srv/hvnhavenry
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose build --no-cache app
+            docker compose up -d --no-deps app
+            docker compose up -d nginx
+            docker image prune -f
+            echo "✓ Deployed at $(date)"
