@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { useHavenStore } from "@/lib/store";
 import { RoomGeometry } from "./RoomGeometry";
 import { RoomLighting } from "./RoomLighting";
 import { Hotspot } from "./Hotspot";
+import { PostFX } from "./PostFX";
+import { Atmosphere } from "./Atmosphere";
 
 const HOTSPOTS = [
   { id: "combRail" as const,      position: [-0.15, 0.95, -0.5]  as [number, number, number], label: "Comb Rail Diffuser" },
@@ -71,6 +73,7 @@ export function RoomScene({ onHotspotSelect }: RoomSceneProps) {
 
         <RoomLighting />
         <RoomGeometry />
+        <Atmosphere />
 
         {HOTSPOTS.map((h) => (
           <Hotspot
@@ -82,6 +85,8 @@ export function RoomScene({ onHotspotSelect }: RoomSceneProps) {
             isSelected={selectedHotspot === h.id}
           />
         ))}
+
+        <PostFX />
       </Suspense>
 
       <OrbitControls
