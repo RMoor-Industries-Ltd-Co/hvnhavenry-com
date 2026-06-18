@@ -24,6 +24,49 @@ const M = {
   rugGray: new THREE.MeshStandardMaterial({ color: "#2e2e32", roughness: 0.98 }),
 };
 
+/**
+ * Soft additive glow halo placed at a flame/ember. On its own it's a faint
+ * warm sphere; run through the Bloom pass it blooms into a volumetric fire
+ * glow that sells the candle as a real light source rather than a bright dot.
+ * The flicker subtly pulses scale + opacity, slightly offset per-instance via
+ * `seed` so a cluster of candles never breathes in lockstep.
+ */
+function FlameGlow({
+  position,
+  radius = 0.05,
+  color = "#ff8a30",
+  intensity = 0.9,
+  seed = 0,
+}: {
+  position: [number, number, number];
+  radius?: number;
+  color?: string;
+  intensity?: number;
+  seed?: number;
+}) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    const m = ref.current;
+    if (!m) return;
+    const t = state.clock.elapsedTime;
+    const flicker = 1 + Math.sin(t * 8.2 + seed) * 0.12 + Math.sin(t * 15.4 + seed * 2) * 0.05;
+    m.scale.setScalar(flicker);
+    (m.material as THREE.MeshBasicMaterial).opacity = intensity * (0.85 + Math.sin(t * 9.3 + seed) * 0.15);
+  });
+  return (
+    <mesh ref={ref} position={position}>
+      <sphereGeometry args={[radius, 12, 12]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={intensity}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
 function Floor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
@@ -252,6 +295,7 @@ function Sofa() {
             <sphereGeometry args={[0.01, 6, 6]} />
             <meshStandardMaterial color="#ffcc44" emissive="#ffaa00" emissiveIntensity={3} />
           </mesh>
+          <FlameGlow position={[0, 0.67, 0]} radius={0.04} color="#ff9030" intensity={0.75} seed={i * 3.7 + 0.5} />
         </group>
       ))}
     </group>
@@ -290,6 +334,7 @@ function CoffeeTable() {
             <sphereGeometry args={[0.008, 6, 6]} />
             <meshStandardMaterial color="#ffcc44" emissive="#ffaa00" emissiveIntensity={4} />
           </mesh>
+          <FlameGlow position={[0, 0.07 + i * 0.02, 0]} radius={0.045} color="#ff9030" intensity={0.8} seed={i * 2.1} />
         </group>
       ))}
       {/* Coffee table book */}
@@ -520,6 +565,7 @@ function EmberLineIncense() {
         <sphereGeometry args={[0.005, 6, 6]} />
         <meshStandardMaterial color="#ff6020" emissive="#ff4010" emissiveIntensity={3} />
       </mesh>
+      <FlameGlow position={[0, 0.36, 0.02]} radius={0.02} color="#ff5018" intensity={0.7} seed={5.2} />
       {/* Rising smoke wisp */}
       <mesh ref={smokeRef} position={[0, 0.45, 0.02]}>
         <planeGeometry args={[0.04, 0.12]} />
@@ -572,6 +618,7 @@ function ShadowChamberCandle() {
         <sphereGeometry args={[0.007, 6, 6]} />
         <meshStandardMaterial color="#ffdd44" emissive="#ff9900" emissiveIntensity={6} />
       </mesh>
+      <FlameGlow position={[0, 0.078, 0]} radius={0.055} color="#ff7a28" intensity={0.95} seed={1.1} />
       {/* Brass base ring */}
       <mesh position={[0, -0.068, 0]} castShadow>
         <cylinderGeometry args={[0.066, 0.066, 0.007, 16]} />
@@ -617,6 +664,7 @@ function ColumnChamberCandle() {
         <sphereGeometry args={[0.005, 6, 6]} />
         <meshStandardMaterial color="#ffee66" emissive="#ffcc00" emissiveIntensity={7} />
       </mesh>
+      <FlameGlow position={[0, 0.176, 0]} radius={0.04} color="#ff8a30" intensity={0.85} seed={3.4} />
       {/* Brass base */}
       <mesh position={[0, -0.143, 0]} castShadow>
         <cylinderGeometry args={[0.046, 0.046, 0.006, 14]} />

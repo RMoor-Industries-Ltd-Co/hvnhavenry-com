@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -8,6 +8,7 @@ import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
+import { HeroRoom } from "@/components/parallax/HeroRoom";
 import { ProductSection } from "@/components/parallax/ProductSection";
 import { PRODUCTS, PRODUCT_ORDER } from "@/lib/products";
 
@@ -23,6 +24,9 @@ if (typeof window !== "undefined") {
 
 export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
+  // Photographic hero by default; the live 3D room is opt-in (kept as a
+  // richer, heavier fallback for capable devices / curious visitors).
+  const [heroMode, setHeroMode] = useState<"photo" | "live">("photo");
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.4, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -59,10 +63,26 @@ export default function Home() {
       <LoadingScreen />
       <NavBar />
 
-      {/* Hero: Full-screen 3D room */}
+      {/* Hero: photographic plate by default, live 3D room on demand */}
       <section className="relative h-screen w-full overflow-hidden">
-        <RoomScene onHotspotSelect={handleHotspotSelect} />
-        <HeroOverlay />
+        {heroMode === "photo" ? (
+          <HeroRoom
+            onHotspotSelect={handleHotspotSelect}
+            onEnterLiveRoom={() => setHeroMode("live")}
+          />
+        ) : (
+          <>
+            <RoomScene onHotspotSelect={handleHotspotSelect} />
+            <HeroOverlay />
+            <button
+              onClick={() => setHeroMode("photo")}
+              className="absolute bottom-16 right-8 z-30 flex items-center gap-2 border border-[#c9a96e]/30 bg-[#0d0b09]/40 px-4 py-2.5 font-sans text-[11px] uppercase tracking-[0.3em] text-[#c9a96e] opacity-70 backdrop-blur-sm transition-all duration-300 hover:border-[#c9a96e]/70 hover:opacity-100 lg:right-16"
+            >
+              <span aria-hidden className="text-sm leading-none">↩</span>
+              Back to photo
+            </button>
+          </>
+        )}
       </section>
 
       {/* Transition band */}
