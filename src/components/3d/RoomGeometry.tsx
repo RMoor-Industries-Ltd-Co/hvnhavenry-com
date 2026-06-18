@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -23,6 +23,23 @@ const M = {
   lampShade: new THREE.MeshStandardMaterial({ color: "#c8a060", roughness: 0.5, transparent: true, opacity: 0.85, side: THREE.BackSide }),
   rugGray: new THREE.MeshStandardMaterial({ color: "#2e2e32", roughness: 0.98 }),
 };
+
+const CITY_LIGHTS = Array.from({ length: 120 }, () => ({
+  z: (Math.random() - 0.5) * 13,
+  y: Math.random() * 3.0 + 0.1,
+  brightness: 0.4 + Math.random() * 0.6,
+  color: Math.random() > 0.5 ? "#ffd080" : "#a0c0ff",
+  w: 0.04 + Math.random() * 0.06,
+  h: 0.03 + Math.random() * 0.04,
+}));
+
+const SHELF_DECOR_COLORS = ["#8a6a3a", "#3a4a6a", "#6a3a3a", "#2a4a3a", "#5a4a2a"];
+const SHELF_ITEMS = Array.from({ length: 28 }, (_, i) => ({
+  x: (Math.random() - 0.5) * 5.0,
+  y: 0.5 + Math.floor(i / 7) * 0.72,
+  w: 0.06 + Math.random() * 0.1,
+  color: SHELF_DECOR_COLORS[Math.floor(Math.random() * SHELF_DECOR_COLORS.length)],
+}));
 
 /**
  * Soft additive glow halo placed at a flame/ember. On its own it's a faint
@@ -155,18 +172,12 @@ function CityWindows() {
       </mesh>
 
       {/* City light dots — building windows simulation */}
-      {Array.from({ length: 120 }, (_, i) => {
-        const z = (Math.random() - 0.5) * 13;
-        const y = Math.random() * 3.0 + 0.1;
-        const brightness = 0.4 + Math.random() * 0.6;
-        const color = Math.random() > 0.5 ? "#ffd080" : "#a0c0ff";
-        return (
-          <mesh key={i} position={[-0.25, y, z]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[0.04 + Math.random() * 0.06, 0.03 + Math.random() * 0.04]} />
-            <meshStandardMaterial color={color} emissive={color} emissiveIntensity={brightness} />
-          </mesh>
-        );
-      })}
+      {CITY_LIGHTS.map((l, i) => (
+        <mesh key={i} position={[-0.25, l.y, l.z]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[l.w, l.h]} />
+          <meshStandardMaterial color={l.color} emissive={l.color} emissiveIntensity={l.brightness} />
+        </mesh>
+      ))}
 
       {/* Horizon glow — sunset/dusk */}
       <mesh position={[-0.2, 0.6, 0]} rotation={[0, Math.PI / 2, 0]}>
@@ -383,15 +394,7 @@ function FloorLamps() {
 }
 
 function ShelvingWall() {
-  const decorColors = ["#8a6a3a", "#3a4a6a", "#6a3a3a", "#2a4a3a", "#5a4a2a"];
-  const items = useMemo(() => {
-    return Array.from({ length: 28 }, (_, i) => ({
-      x: (Math.random() - 0.5) * 5.0,
-      y: 0.5 + Math.floor(i / 7) * 0.72,
-      w: 0.06 + Math.random() * 0.1,
-      color: decorColors[Math.floor(Math.random() * decorColors.length)],
-    }));
-  }, []);
+  const items = SHELF_ITEMS;
 
   return (
     <group position={[5.88, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
