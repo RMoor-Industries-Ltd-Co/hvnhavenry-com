@@ -11,6 +11,13 @@ export interface Product {
   shopifyUrl: string;
   accentColor: string;
   roomPosition: string;
+  /**
+   * Product image path under `public/`. Files are dropped in by the team at
+   * `public/products/<id>.webp`; until a file exists the UI shows a tasteful
+   * monogram placeholder, so a missing image never looks broken.
+   */
+  image: string;
+  imageAlt: string;
 }
 
 export const PRODUCTS: Record<ProductId, Product> = {
@@ -32,6 +39,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/framing-mist-flask-sprayer",
     accentColor: "#1a1510",
     roomPosition: "The side table",
+    image: "/products/flask.webp",
+    imageAlt: "HVN Framing Mist Flask Sprayer",
   },
   combRail: {
     id: "combRail",
@@ -51,6 +60,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/comb-rail-diffuser",
     accentColor: "#0f1215",
     roomPosition: "The coffee table",
+    image: "/products/combRail.webp",
+    imageAlt: "HVN Comb Rail Diffuser with slotted collar",
   },
   bolster: {
     id: "bolster",
@@ -70,6 +81,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/repose-cushion-bolster",
     accentColor: "#111214",
     roomPosition: "The sofa",
+    image: "/products/bolster.webp",
+    imageAlt: "HVN Repose Cushion Bolster",
   },
   emberLine: {
     id: "emberLine",
@@ -89,6 +102,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/ember-line-incense",
     accentColor: "#0d0a07",
     roomPosition: "The shelving wall",
+    image: "/products/emberLine.webp",
+    imageAlt: "HVN Ember Line fine incense — Flat Line",
   },
   shadowChamber: {
     id: "shadowChamber",
@@ -108,6 +123,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/shadow-chamber",
     accentColor: "#0f0d0b",
     roomPosition: "The coffee table",
+    image: "/products/shadowChamber.webp",
+    imageAlt: "HVN Shadow Chamber sculptural candle",
   },
   columnChamber: {
     id: "columnChamber",
@@ -127,6 +144,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/column-chamber",
     accentColor: "#0d0a08",
     roomPosition: "The shelving wall",
+    image: "/products/columnChamber.webp",
+    imageAlt: "HVN Column Chamber lantern candle",
   },
   atmosphereMist: {
     id: "atmosphereMist",
@@ -146,6 +165,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/atmosphere-mist",
     accentColor: "#0a0d10",
     roomPosition: "The side table",
+    image: "/products/atmosphereMist.webp",
+    imageAlt: "HVN Atmosphere Mist room spray",
   },
 };
 

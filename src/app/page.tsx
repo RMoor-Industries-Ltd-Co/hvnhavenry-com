@@ -9,8 +9,12 @@ import { NavBar } from "@/components/ui/NavBar";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroRoom } from "@/components/parallax/HeroRoom";
-import { ProductSection } from "@/components/parallax/ProductSection";
-import { PRODUCTS, PRODUCT_ORDER } from "@/lib/products";
+import { InfoSection } from "@/components/parallax/InfoSection";
+import { ProductDetail } from "@/components/product/ProductDetail";
+import { Newsletter } from "@/components/ui/Newsletter";
+import { infoSections } from "@/lib/content";
+import { PRODUCTS } from "@/lib/products";
+import { useHavenStore } from "@/lib/store";
 
 // Load the 3D scene client-side only (no SSR)
 const RoomScene = dynamic(
@@ -27,6 +31,10 @@ export default function Home() {
   // Photographic hero by default; the live 3D room is opt-in (kept as a
   // richer, heavier fallback for capable devices / curious visitors).
   const [heroMode, setHeroMode] = useState<"photo" | "live">("photo");
+
+  const selectedHotspot = useHavenStore((s) => s.selectedHotspot);
+  const setSelectedHotspot = useHavenStore((s) => s.setSelectedHotspot);
+  const selectedProduct = selectedHotspot ? PRODUCTS[selectedHotspot] : null;
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.4, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -48,15 +56,31 @@ export default function Home() {
     };
   }, []);
 
-  const handleHotspotSelect = (id: string) => {
-    const target = document.getElementById(id);
-    if (!target || !lenisRef.current) return;
-    lenisRef.current.scrollTo(target, {
-      offset: -80,
-      duration: 2.0,
-      easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  // When a piece is selected the lower area swaps to the product view; glide
+  // down to it. ScrollTrigger needs a refresh because the section set changed.
+  useEffect(() => {
+    if (!selectedHotspot || !lenisRef.current) return;
+    const id = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      const target = document.getElementById("product-detail");
+      if (target && lenisRef.current) {
+        lenisRef.current.scrollTo(target, { offset: -60, duration: 1.8 });
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [selectedHotspot]);
+
+  const handleBack = () => {
+    setSelectedHotspot(null);
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      lenisRef.current?.scrollTo(0, { duration: 1.4 });
     });
   };
+
+  // The room hotspots set `selectedHotspot` in the store directly; this is just
+  // the prop both hero variants expect.
+  const handleHotspotSelect = () => {};
 
   return (
     <main>
@@ -85,31 +109,39 @@ export default function Home() {
         )}
       </section>
 
-      {/* Transition band */}
-      <div className="relative h-24 bg-[#0d0b09] flex items-center justify-center">
-        <p className="text-[#c9a96e] opacity-30 text-xs tracking-[0.5em] uppercase font-sans">
-          The Collection
-        </p>
-      </div>
-
-      {/* Parallax product sections */}
-      <section>
-        {PRODUCT_ORDER.map((id, index) => (
-          <ProductSection key={id} product={PRODUCTS[id]} index={index} />
-        ))}
-      </section>
+      {selectedProduct ? (
+        // A piece is selected: show only its details + the newsletter.
+        <>
+          <ProductDetail product={selectedProduct} onBack={handleBack} />
+          <Newsletter />
+        </>
+      ) : (
+        // Default: the five editorial sections.
+        <>
+          <div className="relative flex h-24 items-center justify-center bg-[#0d0b09]">
+            <p className="font-sans text-xs uppercase tracking-[0.5em] text-[#c9a96e] opacity-30">
+              The Havenry
+            </p>
+          </div>
+          <section>
+            {infoSections.map((section, index) => (
+              <InfoSection key={section.id} section={section} index={index} />
+            ))}
+          </section>
+        </>
+      )}
 
       {/* Footer */}
-      <footer className="border-t border-[#c9a96e]/10 py-16 px-8 lg:px-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 bg-[#0d0b09]">
+      <footer className="flex flex-col items-start justify-between gap-8 border-t border-[#c9a96e]/10 bg-[#0d0b09] px-8 py-16 md:flex-row md:items-center lg:px-16">
         <div>
-          <div className="font-display text-3xl tracking-[0.3em] text-[#c9a96e] mb-1">HVN</div>
-          <p className="text-[#c9a96e] opacity-30 text-xs tracking-[0.5em] uppercase font-sans">Havenry</p>
+          <div className="mb-1 font-display text-3xl tracking-[0.3em] text-[#c9a96e]">HVN</div>
+          <p className="font-sans text-xs uppercase tracking-[0.5em] text-[#c9a96e] opacity-30">Havenry</p>
         </div>
         <div className="flex flex-col gap-2 text-right">
-          <p className="text-xs text-[#e8dcc8] opacity-40 font-sans tracking-wide">
+          <p className="font-sans text-xs tracking-wide text-[#e8dcc8] opacity-40">
             Curated great rooms for the discerning few.
           </p>
-          <p className="text-xs text-[#c9a96e] opacity-30 font-sans">
+          <p className="font-sans text-xs text-[#c9a96e] opacity-30">
             © {new Date().getFullYear()} HVN Havenry. All rights reserved.
           </p>
         </div>
