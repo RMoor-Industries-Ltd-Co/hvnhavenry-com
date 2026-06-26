@@ -1,12 +1,15 @@
 name: Deploy to Calculus-Havenry
 
 on:
+  pull_request:
   push:
     branches: [main]
 
+# main deploys stay strictly serial and uncancellable; PRs validate in
+# parallel, cancelling their own superseded runs.
 concurrency:
-  group: deploy-hvnhavenry
-  cancel-in-progress: false
+  group: ${{ github.ref == 'refs/heads/main' && 'deploy-hvnhavenry' || format('validate-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   validate:
@@ -34,6 +37,8 @@ jobs:
   deploy:
     name: Build & deploy
     needs: validate
+    # Validate runs on PRs for pre-merge feedback; only deploy on a push to main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
