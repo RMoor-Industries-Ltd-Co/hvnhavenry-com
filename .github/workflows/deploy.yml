@@ -4,9 +4,36 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: deploy-hvnhavenry
+  cancel-in-progress: false
+
 jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
   deploy:
     name: Build & deploy
+    needs: validate
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +51,7 @@ jobs:
             cd /srv/hvnhavenry
             git fetch origin main
             git reset --hard origin/main
-            docker compose build --no-cache app
+            docker compose build app
             docker compose up -d --no-deps app
             docker compose up -d nginx
             docker image prune -f
