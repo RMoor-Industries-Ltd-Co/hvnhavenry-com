@@ -1,24 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
-import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
+import { HeroBackground } from "@/components/parallax/HeroBackground";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
 import { RoomTabs } from "@/components/room/RoomTabs";
 import { VideoRevealSection } from "@/components/video/VideoRevealSection";
 import { useHavenStore } from "@/lib/store";
-import { PRODUCTS, ProductId } from "@/lib/products";
-
-// Load the 3D scene client-side only (no SSR)
-const RoomScene = dynamic(
-  () => import("@/components/3d/RoomScene").then((m) => m.RoomScene),
-  { ssr: false }
-);
 
 const FOOTER_LINKS = {
   Shop: ["Atmos Ritual", "HVN Chamber", "HVN Living", "Standard Line"],
@@ -33,8 +25,6 @@ if (typeof window !== "undefined") {
 export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
   const setScrollToSection = useHavenStore((s) => s.setScrollToSection);
-  const setActiveCollection = useHavenStore((s) => s.setActiveCollection);
-  const setActiveTabItem = useHavenStore((s) => s.setActiveTabItem);
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.4, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -66,29 +56,13 @@ export default function Home() {
     };
   }, [setScrollToSection]);
 
-  const handleHotspotSelect = (id: string) => {
-    const product = PRODUCTS[id as ProductId];
-    if (!product) return;
-    setActiveCollection(product.collection);
-    setActiveTabItem(product.id);
-
-    const target = document.getElementById("the-room");
-    if (!target || !lenisRef.current) return;
-    lenisRef.current.scrollTo(target, {
-      offset: -80,
-      duration: 2.0,
-      easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
-    });
-  };
-
   return (
     <main>
-      <LoadingScreen />
       <NavBar />
 
-      {/* Hero: Full-screen 3D room */}
+      {/* Hero */}
       <section className="relative h-screen w-full overflow-hidden">
-        <RoomScene onHotspotSelect={handleHotspotSelect} />
+        <HeroBackground />
         <HeroOverlay />
       </section>
 

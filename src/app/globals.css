@@ -79,6 +79,15 @@ body {
   animation: hotspot-ring 2.2s ease-out infinite;
 }
 
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+
+.animate-ambient-glow {
+  animation: ambient-glow 8s ease-in-out infinite;
+}
+
 .gold-shimmer {
   background: linear-gradient(
     90deg,

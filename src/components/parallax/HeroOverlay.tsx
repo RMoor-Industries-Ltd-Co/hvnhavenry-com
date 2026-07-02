@@ -2,14 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { useHavenStore } from "@/lib/store";
 
 export function HeroOverlay() {
-  const { isRoomReady } = useHavenStore();
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isRoomReady || !overlayRef.current) return;
+    if (!overlayRef.current) return;
     gsap.from(overlayRef.current.querySelectorAll("[data-anim]"), {
       opacity: 0,
       y: 30,
@@ -18,7 +16,7 @@ export function HeroOverlay() {
       ease: "power3.out",
       delay: 0.3,
     });
-  }, [isRoomReady]);
+  }, []);
 
   return (
     <div
@@ -35,7 +33,7 @@ export function HeroOverlay() {
           <span className="italic text-[#c9a96e]">one can dream of</span>
         </h1>
         <p data-anim className="text-sm text-[#e8dcc8] opacity-50 font-sans leading-relaxed max-w-sm">
-          Explore the great room. Click any piece to discover its story.
+          Scroll to discover the great room, piece by piece.
         </p>
       </div>
 
