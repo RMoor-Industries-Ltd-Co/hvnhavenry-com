@@ -11,6 +11,11 @@ export interface Product {
   shopifyUrl: string;
   accentColor: string;
   roomPosition: string;
+  /** Position (percent, 0-100) of this item's hotspot within its collection's room tab */
+  tabHotspot: { x: number; y: number };
+  /** Whether this item has an accompanying film that opens in the video section */
+  hasVideo?: boolean;
+  videoLabel?: string;
 }
 
 export const PRODUCTS: Record<ProductId, Product> = {
@@ -32,6 +37,7 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/framing-mist-flask-sprayer",
     accentColor: "#1a1510",
     roomPosition: "The side table",
+    tabHotspot: { x: 72, y: 58 },
   },
   combRail: {
     id: "combRail",
@@ -51,6 +57,7 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/comb-rail-diffuser",
     accentColor: "#0f1215",
     roomPosition: "The coffee table",
+    tabHotspot: { x: 34, y: 62 },
   },
   bolster: {
     id: "bolster",
@@ -70,6 +77,7 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/repose-cushion-bolster",
     accentColor: "#111214",
     roomPosition: "The sofa",
+    tabHotspot: { x: 50, y: 60 },
   },
   emberLine: {
     id: "emberLine",
@@ -89,6 +97,7 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/ember-line-incense",
     accentColor: "#0d0a07",
     roomPosition: "The shelving wall",
+    tabHotspot: { x: 50, y: 55 },
   },
   shadowChamber: {
     id: "shadowChamber",
@@ -108,6 +117,9 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/shadow-chamber",
     accentColor: "#0f0d0b",
     roomPosition: "The coffee table",
+    tabHotspot: { x: 36, y: 62 },
+    hasVideo: true,
+    videoLabel: "Light Held, Shadow Cast — The Film",
   },
   columnChamber: {
     id: "columnChamber",
@@ -127,6 +139,9 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/column-chamber",
     accentColor: "#0d0a08",
     roomPosition: "The shelving wall",
+    tabHotspot: { x: 66, y: 46 },
+    hasVideo: true,
+    videoLabel: "Form Before Flame — The Film",
   },
   atmosphereMist: {
     id: "atmosphereMist",
@@ -146,6 +161,7 @@ export const PRODUCTS: Record<ProductId, Product> = {
     shopifyUrl: "https://hvnhavenry.com/products/atmosphere-mist",
     accentColor: "#0a0d10",
     roomPosition: "The side table",
+    tabHotspot: { x: 22, y: 48 },
   },
 };
 
@@ -158,3 +174,17 @@ export const PRODUCT_ORDER: ProductId[] = [
   "bolster",
   "emberLine",
 ];
+
+/** Ordered list of collection tabs for the interactive room section */
+export const COLLECTION_ORDER: string[] = [
+  "ATMOS RITUAL",
+  "HVN CHAMBER",
+  "HVN LIVING",
+  "STANDARD LINE",
+];
+
+export function getProductsByCollection(collection: string): Product[] {
+  return PRODUCT_ORDER.map((id) => PRODUCTS[id]).filter(
+    (p) => p.collection === collection
+  );
+}

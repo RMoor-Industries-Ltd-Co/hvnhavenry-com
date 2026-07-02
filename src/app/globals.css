@@ -71,6 +71,14 @@ body {
   animation: fade-up 0.8s ease forwards;
 }
 
+.animate-hotspot-pulse {
+  animation: hotspot-pulse 2.2s ease-in-out infinite;
+}
+
+.animate-hotspot-ring {
+  animation: hotspot-ring 2.2s ease-out infinite;
+}
+
 .gold-shimmer {
   background: linear-gradient(
     90deg,
