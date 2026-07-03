@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "assets:pull": "node scripts/pull-assets.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "googleapis": "^144.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,0 +1,15 @@
+{
+  "$schema": "./scripts/assets.manifest.schema.json",
+  "assets": [
+    {
+      "driveFileId": "1wz-lDYv9U8qhqa8Pb-3l9ya8_75Nw8Kv",
+      "name": "hero__great-room__day.png",
+      "destPath": "assets/hero/hero__great-room__day.png"
+    },
+    {
+      "driveFileId": "1EvF_pwXQHmRwOzhbPApU9B1yzY0eQiJs",
+      "name": "hero__great-room__night.png",
+      "destPath": "assets/hero/hero__great-room__night.png"
+    }
+  ]
+}
