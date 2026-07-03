@@ -15,8 +15,11 @@ Root: **`HVN_HAVENRY_SITE`** — <https://drive.google.com/drive/folders/1OUtfCN
 ```
 HVN_HAVENRY_SITE/
 ├── 00_BRAND/            Singleton brand assets — favicon, logo, social preview
+│   └── MARKS/           Recurring brand seals/stamps (see `mark` category below)
 ├── 01_HERO/             Section 1 (hero) imagery
+│   └── CHARACTERS/      Persona hero art, one subfolder per character (ADAM, EVE, …)
 ├── 02_STORY/            Section 2 (scroll-story) imagery, if ever needed
+│   └── WORDING/         Story copy/text reference — convention TBD
 ├── 03_ROOM/
 │   ├── atmos-ritual/    Section 3 room-tab imagery, one subfolder per collection
 │   ├── hvn-chamber/
@@ -34,7 +37,8 @@ HVN_HAVENRY_SITE/
 ```
 
 `_REFERENCE`, `_INBOX`, and `_ARCHIVE` are excluded from the pull script by convention —
-nothing under them should ever reach `public/`.
+nothing under them should ever reach `public/`. `01_HERO/CHARACTERS` and `02_STORY/WORDING`
+are in-progress additions — their own naming convention isn't formalized yet.
 
 ## Naming convention
 
@@ -65,7 +69,8 @@ Everything else (hero variants, room tabs, product photography, promo creative) 
 ```
 
 - **`category`** — fixed vocabulary: `hero`, `story`, `room`, `video`, `footer`,
-  `product`, `promo`, `reference`. (Matches the top-level Drive folder it lives in.)
+  `product`, `promo`, `reference`, `mark`. (Matches the top-level Drive folder it lives
+  in.)
 - **`slug`** — kebab-case identifier: a product id, a collection id, a campaign id.
   Matches the ids already used in code (`src/lib/products.ts` `ProductId`,
   `COLLECTION_ORDER`) wherever one exists — don't invent a second name for the same thing.
@@ -89,6 +94,19 @@ Variant vocab by category (extend the list here before inventing a new word):
 | `product` | `hero`, `detail`, `lifestyle` |
 | `promo` | `banner`, `social`, `concept` |
 | `video` | `poster`, `film` |
+| `mark` | `seal`, `splash`, `stamp` |
+
+**`mark` — brand seals** (new): recurring brand-identity visuals — a phrase, stamp, or
+seal meant to represent HVN generally and close out promotions, distinct from `promo`
+(one-off campaign creative) and the fixed `00_BRAND/` slot files (favicon/logo/og-image).
+Lives in `00_BRAND/MARKS/`. The `slug` is drawn from the phrase/concept itself (e.g. the
+line "Atmospheric Jurisdiction" → `atmospheric-jurisdiction`), not a generic "brand" or
+"hvn" slug — each distinct phrase gets its own slug so the collection can grow. Variant
+describes how it's used:
+
+- `seal` — a badge/stamp-style close (the default treatment)
+- `splash` — a full-bleed screen treatment
+- `stamp` — a small inline mark
 
 **Examples:**
 
@@ -102,6 +120,7 @@ product__shadow-chamber__detail__02.webp
 promo__summer-launch-2026__banner__01.webp
 video__shadow-chamber__poster.webp
 video__shadow-chamber__film.mp4
+mark__atmospheric-jurisdiction__seal.png
 ```
 
 ## `assets.manifest.json`
