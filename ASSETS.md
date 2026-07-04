@@ -96,7 +96,7 @@ Variant vocab by category (extend the list here before inventing a new word):
 | `promo` | `banner`, `social`, `concept` |
 | `video` | `poster`, `film` |
 | `mark` | `seal`, `splash`, `stamp` |
-| `character` | `portrait`, `stance`, `gesture`, `profile` |
+| `character` | `stance`, `add-to-cart`, `cart-checkout`, `quiz-welcome` |
 
 **`mark` — brand seals** (new): recurring brand-identity visuals — a phrase, stamp, or
 seal meant to represent HVN generally and close out promotions, distinct from `promo`
@@ -114,12 +114,18 @@ describes how it's used:
 HVN products (site, quizzes, future surfaces), distinct from one-off `promo` concept art.
 Lives in `01_HERO/CHARACTERS/<CHARACTER-NAME>/`. The `slug` is the character's name (e.g.
 `vale`), so a given character's whole photo set stays together regardless of which
-product ends up using a given pose. Variant is pose-based and shared across characters:
+product ends up using a given pose. Variant names the concrete usage moment, not an
+abstract pose — this reads more clearly than a generic pose taxonomy once a character is
+tied to specific product touchpoints:
 
-- `portrait` — close/half-body, direct-to-camera
-- `stance` — full-body, neutral/authoritative (e.g. arms folded)
-- `gesture` — full-body, front-facing, inviting/presenting
-- `profile` — full-body, side-angle, gesturing
+- `stance` — full-body, neutral/authoritative (e.g. arms folded) — used as a persistent
+  companion image (e.g. pinned during a quiz flow)
+- `add-to-cart` — confirms an item was added
+- `cart-checkout` — guides toward checkout
+- `quiz-welcome` — introduces a quiz/training flow
+
+Add new variants the same way as new poses come in — name them for the moment they
+serve, not a generic pose label.
 
 **Cast:**
 
@@ -140,8 +146,8 @@ promo__summer-launch-2026__banner__01.webp
 video__shadow-chamber__poster.webp
 video__shadow-chamber__film.mp4
 mark__atmospheric-jurisdiction__seal.png
-character__vale__portrait.png
 character__vale__stance.png
+character__vale__add-to-cart.png
 ```
 
 ## `assets.manifest.json`
@@ -181,6 +187,15 @@ Pulled files are gitignored (see `.gitignore`) — `public/` on disk is a build 
 not a source file, for anything under `public/assets/` or in the brand-slot list above.
 Never hand-commit a binary into one of those paths; add it to Drive and the manifest
 instead.
+
+**Exception, temporary:** the four `character__vale__*.png` files under
+`public/assets/characters/vale/` are hand-committed as a deliberate one-time bridge —
+`GDRIVE_ASSETS_CREDENTIALS` doesn't exist yet, so the automated pull can't run, and these
+were needed live before that setup work was done. They're explicitly un-ignored in
+`.gitignore`. Once the service account exists, remove them from git and let
+`npm run assets:pull` own them like everything else — they're already in
+`assets.manifest.json` pointing at the same Drive files, so the pull will overwrite them
+with identical content.
 
 ### One-time setup required (not yet done)
 
