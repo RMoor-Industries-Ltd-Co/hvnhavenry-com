@@ -17,7 +17,7 @@ HVN_HAVENRY_SITE/
 ├── 00_BRAND/            Singleton brand assets — favicon, logo, social preview
 │   └── MARKS/           Recurring brand seals/stamps (see `mark` category below)
 ├── 01_HERO/             Section 1 (hero) imagery
-│   └── CHARACTERS/      Persona hero art, one subfolder per character (ADAM, EVE, …)
+│   └── CHARACTERS/      Cast photography, one subfolder per character (VALE, EVE, …)
 ├── 02_STORY/            Section 2 (scroll-story) imagery, if ever needed
 │   └── WORDING/         Story copy/text reference — convention TBD
 ├── 03_ROOM/
@@ -37,8 +37,9 @@ HVN_HAVENRY_SITE/
 ```
 
 `_REFERENCE`, `_INBOX`, and `_ARCHIVE` are excluded from the pull script by convention —
-nothing under them should ever reach `public/`. `01_HERO/CHARACTERS` and `02_STORY/WORDING`
-are in-progress additions — their own naming convention isn't formalized yet.
+nothing under them should ever reach `public/`. `01_HERO/CHARACTERS` now follows the
+`character` category convention below. `02_STORY/WORDING` is still an in-progress
+addition — its own naming convention isn't formalized yet.
 
 ## Naming convention
 
@@ -69,8 +70,8 @@ Everything else (hero variants, room tabs, product photography, promo creative) 
 ```
 
 - **`category`** — fixed vocabulary: `hero`, `story`, `room`, `video`, `footer`,
-  `product`, `promo`, `reference`, `mark`. (Matches the top-level Drive folder it lives
-  in.)
+  `product`, `promo`, `reference`, `mark`, `character`. (Matches the top-level Drive
+  folder it lives in.)
 - **`slug`** — kebab-case identifier: a product id, a collection id, a campaign id.
   Matches the ids already used in code (`src/lib/products.ts` `ProductId`,
   `COLLECTION_ORDER`) wherever one exists — don't invent a second name for the same thing.
@@ -95,6 +96,7 @@ Variant vocab by category (extend the list here before inventing a new word):
 | `promo` | `banner`, `social`, `concept` |
 | `video` | `poster`, `film` |
 | `mark` | `seal`, `splash`, `stamp` |
+| `character` | `portrait`, `stance`, `gesture`, `profile` |
 
 **`mark` — brand seals** (new): recurring brand-identity visuals — a phrase, stamp, or
 seal meant to represent HVN generally and close out promotions, distinct from `promo`
@@ -107,6 +109,23 @@ describes how it's used:
 - `seal` — a badge/stamp-style close (the default treatment)
 - `splash` — a full-bleed screen treatment
 - `stamp` — a small inline mark
+
+**`character` — cast photography** (new): named persona/cast members who appear across
+HVN products (site, quizzes, future surfaces), distinct from one-off `promo` concept art.
+Lives in `01_HERO/CHARACTERS/<CHARACTER-NAME>/`. The `slug` is the character's name (e.g.
+`vale`), so a given character's whole photo set stays together regardless of which
+product ends up using a given pose. Variant is pose-based and shared across characters:
+
+- `portrait` — close/half-body, direct-to-camera
+- `stance` — full-body, neutral/authoritative (e.g. arms folded)
+- `gesture` — full-body, front-facing, inviting/presenting
+- `profile` — full-body, side-angle, gesturing
+
+**Cast:**
+
+| Character | Role |
+|---|---|
+| Vale | HVN Havenry's concierge — assists patrons while shopping, confirms cart adds; also hosts/congratulates on the Lexicon Training quiz (Cappo Meridian) |
 
 **Examples:**
 
@@ -121,6 +140,8 @@ promo__summer-launch-2026__banner__01.webp
 video__shadow-chamber__poster.webp
 video__shadow-chamber__film.mp4
 mark__atmospheric-jurisdiction__seal.png
+character__vale__portrait.png
+character__vale__stance.png
 ```
 
 ## `assets.manifest.json`
