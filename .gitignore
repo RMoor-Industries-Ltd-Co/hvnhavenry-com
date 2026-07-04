@@ -40,3 +40,23 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Pulled from Google Drive (HVN_HAVENRY_SITE) via `npm run assets:pull` — see ASSETS.md.
+# Never hand-commit a binary into these paths; add it to Drive + assets.manifest.json instead.
+/public/assets/*
+!/public/assets/.gitkeep
+
+# Temporary exception — see "Exception, temporary" in ASSETS.md. Remove once
+# GDRIVE_ASSETS_CREDENTIALS exists and `npm run assets:pull` can own these instead.
+!/public/assets/characters/
+!/public/assets/characters/vale/
+!/public/assets/characters/vale/character__vale__stance.png
+!/public/assets/characters/vale/character__vale__add-to-cart.png
+!/public/assets/characters/vale/character__vale__cart-checkout.png
+!/public/assets/characters/vale/character__vale__quiz-welcome.png
+
+/public/favicon.svg
+/public/favicon-512.png
+/public/logo-mark.svg
+/public/logo-wordmark.svg
+/public/og-image.png

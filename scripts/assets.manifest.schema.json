@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HVN Havenry asset manifest",
+  "type": "object",
+  "required": ["assets"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["driveFileId", "name", "destPath"],
+        "additionalProperties": false,
+        "properties": {
+          "driveFileId": {
+            "type": "string",
+            "description": "Google Drive file id (the segment between /d/ and /view in the file's URL)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Canonical filename per ASSETS.md's naming convention. Must match either a fixed brand-slot name or the <category>__<slug>__<variant>[__<seq>].<ext> pattern.",
+            "pattern": "^([a-z0-9-]+\\.(svg|png|webp|jpg|jpeg|mp4|webm|ico))$|^([a-z]+__[a-z0-9-]+__[a-z0-9-]+(__[0-9]{2})?\\.(svg|png|webp|jpg|jpeg|mp4|webm))$"
+          },
+          "destPath": {
+            "type": "string",
+            "description": "Path relative to public/ that the asset is written to."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "./scripts/assets.manifest.schema.json",
+  "assets": [
+    {
+      "driveFileId": "1wz-lDYv9U8qhqa8Pb-3l9ya8_75Nw8Kv",
+      "name": "hero__great-room__day.png",
+      "destPath": "assets/hero/hero__great-room__day.png"
+    },
+    {
+      "driveFileId": "1EvF_pwXQHmRwOzhbPApU9B1yzY0eQiJs",
+      "name": "hero__great-room__night.png",
+      "destPath": "assets/hero/hero__great-room__night.png"
+    },
+    {
+      "driveFileId": "176xwpbsuavHNRoIWQtp6UYALvVH0Qy0j",
+      "name": "character__vale__stance.png",
+      "destPath": "assets/characters/vale/character__vale__stance.png"
+    },
+    {
+      "driveFileId": "1NfmoWDMAdY9cqmQvd58VqzE4wX-AWrSX",
+      "name": "character__vale__add-to-cart.png",
+      "destPath": "assets/characters/vale/character__vale__add-to-cart.png"
+    },
+    {
+      "driveFileId": "18mXoaHDc83IyHepOdDqPHNC7kPp7BvbP",
+      "name": "character__vale__cart-checkout.png",
+      "destPath": "assets/characters/vale/character__vale__cart-checkout.png"
+    },
+    {
+      "driveFileId": "1CYqT1lOflkF5c_EHHfEtgF7tVRZ-FOco",
+      "name": "character__vale__quiz-welcome.png",
+      "destPath": "assets/characters/vale/character__vale__quiz-welcome.png"
+    }
+  ]
+}

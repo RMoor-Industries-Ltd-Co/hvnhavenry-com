@@ -5,6 +5,7 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
+import { ValeConcierge } from "@/components/ui/ValeConcierge";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
@@ -59,6 +60,7 @@ export default function Home() {
   return (
     <main>
       <NavBar />
+      <ValeConcierge />
 
       {/* Hero */}
       <section className="relative h-screen w-full overflow-hidden">
