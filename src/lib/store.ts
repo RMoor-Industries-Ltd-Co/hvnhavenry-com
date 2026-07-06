@@ -20,6 +20,11 @@ interface HavenStore {
   scrollToSection: ((id: string) => void) | null;
   setScrollToSection: (fn: (id: string) => void) => void;
 
+  // Which top-level section owns the nav right now (drives the stacked NavBar)
+  // 0 = hero, 1 = scroll-story, 2 = collection/room and beyond
+  activeNavSection: number;
+  setActiveNavSection: (section: number) => void;
+
   // Vale, the concierge — brief confirmation moments surfaced across the site
   valeMoment: "add-to-cart" | "cart-checkout" | null;
   triggerValeMoment: (moment: "add-to-cart" | "cart-checkout") => void;
@@ -40,6 +45,9 @@ export const useHavenStore = create<HavenStore>((set) => ({
 
   scrollToSection: null,
   setScrollToSection: (fn) => set({ scrollToSection: fn }),
+
+  activeNavSection: 0,
+  setActiveNavSection: (section) => set({ activeNavSection: section }),
 
   valeMoment: null,
   triggerValeMoment: (moment) => set({ valeMoment: moment }),

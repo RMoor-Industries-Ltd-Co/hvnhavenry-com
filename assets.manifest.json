@@ -30,6 +30,11 @@
       "driveFileId": "1CYqT1lOflkF5c_EHHfEtgF7tVRZ-FOco",
       "name": "character__vale__quiz-welcome.png",
       "destPath": "assets/characters/vale/character__vale__quiz-welcome.png"
+    },
+    {
+      "driveFileId": "158-6GDqXkqHaH4APThStZqYFhdIUHxag",
+      "name": "mark__hvn-havenry__splash.png",
+      "destPath": "assets/marks/mark__hvn-havenry__splash.png"
     }
   ]
 }

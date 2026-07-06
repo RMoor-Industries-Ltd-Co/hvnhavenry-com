@@ -15,7 +15,7 @@ import { useHavenStore } from "@/lib/store";
 
 const FOOTER_LINKS = {
   Shop: ["Atmos Ritual", "HVN Chamber", "HVN Living", "Standard Line"],
-  Company: ["The Room", "Bespoke", "Contact", "Book a Consultation"],
+  Company: ["The Room", "Bespoke", "Contact", "Speak to Concierge"],
   Legal: ["Terms & Conditions", "Shipping", "Privacy"],
 };
 
@@ -23,9 +23,18 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// Maps a DOM anchor to the nav section it activates. As each anchor's top
+// crosses the viewport center — scrolling either way — the stacked NavBar swaps.
+const NAV_SECTIONS = [
+  { id: "top", section: 0 },
+  { id: "story", section: 1 },
+  { id: "concierge", section: 2 },
+];
+
 export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
   const setScrollToSection = useHavenStore((s) => s.setScrollToSection);
+  const setActiveNavSection = useHavenStore((s) => s.setActiveNavSection);
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.4, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -50,12 +59,26 @@ export default function Home() {
       });
     });
 
+    // Drive the stacked NavBar: activate a section when its anchor reaches center.
+    const navTriggers = NAV_SECTIONS.map(({ id, section }) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      return ScrollTrigger.create({
+        trigger: el,
+        start: "top center",
+        onEnter: () => setActiveNavSection(section),
+        onEnterBack: () => setActiveNavSection(section),
+      });
+    });
+    ScrollTrigger.refresh();
+
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      navTriggers.forEach((t) => t?.kill());
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [setScrollToSection]);
+  }, [setScrollToSection, setActiveNavSection]);
 
   return (
     <main>
@@ -63,16 +86,20 @@ export default function Home() {
       <ValeConcierge />
 
       {/* Hero */}
-      <section className="relative h-screen w-full overflow-hidden">
+      <section id="top" className="relative h-screen w-full overflow-hidden">
         <HeroBackground />
         <HeroOverlay />
       </section>
 
       {/* Section 2: Scroll-pinned story */}
-      <ScrollStory />
+      <div id="story">
+        <ScrollStory />
+      </div>
 
-      {/* Section 3: Interactive room tabs */}
-      <RoomTabs />
+      {/* Section 3: Interactive room tabs — the concierge / shopping destination */}
+      <div id="concierge">
+        <RoomTabs />
+      </div>
 
       {/* Section 4: Collapsible video reveal */}
       <VideoRevealSection />
