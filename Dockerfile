@@ -30,10 +30,18 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
+# Asset-pull entrypoint: fetches Drive assets into public/ at container start
+# (dependency-free OAuth path; no-ops without creds). public/ must be writable
+# by the runtime user so the pull can land files there.
+COPY --from=builder /app/scripts/pull-assets.mjs ./scripts/pull-assets.mjs
+COPY --from=builder /app/scripts/start.sh ./scripts/start.sh
+COPY --from=builder /app/assets.manifest.json ./assets.manifest.json
+RUN chown -R nextjs:nodejs /app/public /app/scripts
+
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "server.js"]
+CMD ["sh", "scripts/start.sh"]
