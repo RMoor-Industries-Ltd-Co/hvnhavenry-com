@@ -216,11 +216,16 @@ with identical content.
 Until one of these is set, `npm run assets:pull` is a documented no-op — the manifest and
 script are ready, but nothing will actually download.
 
-### Wiring into CI/deploy (not yet done)
+### Wiring into deploy (done — hands-free)
 
-`npm run assets:pull` is **not** currently invoked automatically by `npm run build`, the
-`Dockerfile`, or `.github/workflows/deploy.yml` — wiring it in is a deliberate follow-up
-step, not done here, so that adding this pipeline can't silently break builds for anyone
-who doesn't yet have `GDRIVE_ASSETS_CREDENTIALS` configured. Once the service account
-above exists, add a step before the Docker build (or a Dockerfile build stage) that runs
-`npm run assets:pull` with the secret injected.
+The pull runs automatically at **container start**, before the Next.js server boots
+(`scripts/start.sh`, wired as the image `CMD` in the `Dockerfile`). It reads the runtime
+environment — the same Doppler-injected `env_file: .env.local` docker-compose already
+loads — so on every deploy/restart the container fetches fresh Drive assets into `public/`
+with no manual step. It **no-ops safely** when no `GDRIVE_*` creds are present (local dev,
+PR/CI, or any environment without them), so it can never block a build or boot.
+
+The OAuth path is dependency-free (built-in `fetch`), so it runs in the slim standalone
+runtime image without bundling `googleapis`. To activate live asset pulling, just ensure
+`GDRIVE_CLIENT_ID` / `GDRIVE_CLIENT_SECRET` / `GDRIVE_REFRESH_TOKEN` are in the deploy
+environment (Doppler) — nothing else to change.
