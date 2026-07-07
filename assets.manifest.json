@@ -2,7 +2,7 @@
   "$schema": "./scripts/assets.manifest.schema.json",
   "assets": [
     {
-      "driveFileId": "1wz-lDYv9U8qhqa8Pb-3l9ya8_75Nw8Kv",
+      "driveFileId": "1JDZQCVr3AKn45riWxQ2pIFiq0ltQwbo5",
       "name": "hero__great-room__day.png",
       "destPath": "assets/hero/hero__great-room__day.png"
     },
@@ -32,7 +32,7 @@
       "destPath": "assets/characters/vale/character__vale__quiz-welcome.png"
     },
     {
-      "driveFileId": "158-6GDqXkqHaH4APThStZqYFhdIUHxag",
+      "driveFileId": "1BUa18ZCdUh7AURTV9r_bzFDJQai8HlHL",
       "name": "mark__hvn-havenry__splash.png",
       "destPath": "assets/marks/mark__hvn-havenry__splash.png"
     }

@@ -1,8 +1,16 @@
 export function HeroBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#0d0b09]">
-      {/* Base gradient — mahogany to near-black, evoking the great room at dusk */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,#2a1810_0%,#0d0b09_55%),linear-gradient(160deg,#1a1035_0%,#0d0b09_60%)] opacity-90" />
+      {/* Hero photograph (pulled from Drive: hero__great-room__day). Falls back to
+          the dusk gradient below when the asset isn't present yet. */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(/assets/hero/hero__great-room__day.png)` }}
+      />
+
+      {/* Base gradient — mahogany to near-black, evoking the great room at dusk.
+          Tints the photograph and stands alone as the fallback. */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,#2a1810_0%,#0d0b09_55%),linear-gradient(160deg,#1a1035_0%,#0d0b09_60%)] opacity-45" />
 
       {/* Warm ambient glows — floor lamps / candlelight */}
       <div className="absolute left-[18%] bottom-[15%] w-72 h-72 rounded-full bg-[#c9a96e] blur-[120px] opacity-20 animate-ambient-glow" />
