@@ -47,17 +47,43 @@ jobs:
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
+          # Pass the Doppler-synced Drive creds through to the SSH session so the
+          # deploy can write them into the container's runtime env file.
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN
           script: |
             set -e
             cd /srv/hvnhavenry
             git fetch origin main
             git reset --hard origin/main
+
+            # Ensure the container's runtime env carries the Drive creds so the
+            # startup asset-pull runs hands-free. Upsert idempotently, and only
+            # when a value is actually present — never overwrite a good value
+            # with an empty one (e.g. if a secret isn't synced to this workflow).
+            touch .env.local
+            upsert_env() {
+              key="$1"; val="$2"
+              [ -z "$val" ] && return 0
+              grep -v "^${key}=" .env.local > .env.local.tmp 2>/dev/null || true
+              printf '%s=%s\n' "$key" "$val" >> .env.local.tmp
+              mv .env.local.tmp .env.local
+            }
+            upsert_env GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
+            upsert_env GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
+            upsert_env GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+
             docker compose build app
-            docker compose up -d --no-deps app
+            # force-recreate so the container picks up the refreshed env file and
+            # re-runs the startup asset pull on every deploy.
+            docker compose up -d --no-deps --force-recreate app
             docker compose up -d nginx
             docker image prune -f
             echo "✓ Deployed at $(date)"

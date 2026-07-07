@@ -1,11 +1,11 @@
 export function HeroBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#0d0b09]">
-      {/* Hero photograph (pulled from Drive: hero__great-room__day). Falls back to
-          the dusk gradient below when the asset isn't present yet. */}
+      {/* Hero photograph (pulled from Drive: hero__hvn-havenry__section01). Falls
+          back to the dusk gradient below when the asset isn't present yet. */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(/assets/hero/hero__great-room__day.png)` }}
+        style={{ backgroundImage: `url(/assets/hero/hero__hvn-havenry__section01.png)` }}
       />
 
       {/* Base gradient — mahogany to near-black, evoking the great room at dusk.
