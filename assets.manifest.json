@@ -3,6 +3,11 @@
   "assets": [
     {
       "driveFileId": "1JDZQCVr3AKn45riWxQ2pIFiq0ltQwbo5",
+      "name": "hero__hvn-havenry__section01.png",
+      "destPath": "assets/hero/hero__hvn-havenry__section01.png"
+    },
+    {
+      "driveFileId": "1wz-lDYv9U8qhqa8Pb-3l9ya8_75Nw8Kv",
       "name": "hero__great-room__day.png",
       "destPath": "assets/hero/hero__great-room__day.png"
     },
@@ -33,8 +38,8 @@
     },
     {
       "driveFileId": "1BUa18ZCdUh7AURTV9r_bzFDJQai8HlHL",
-      "name": "mark__hvn-havenry__splash.png",
-      "destPath": "assets/marks/mark__hvn-havenry__splash.png"
+      "name": "mark__hvn-havenry__splash_section02.png",
+      "destPath": "assets/marks/mark__hvn-havenry__splash_section02.png"
     }
   ]
 }

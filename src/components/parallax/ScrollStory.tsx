@@ -26,9 +26,9 @@ const BEATS: Beat[] = [
 ];
 
 // Background brand splash — pulled from Drive via the asset pipeline
-// (mark__hvn-havenry__splash). Rendered as a CSS background so a missing/
-// not-yet-pulled file degrades to the ambient gradient rather than a broken img.
-const BG_SRC = "/assets/marks/mark__hvn-havenry__splash.png";
+// (mark__hvn-havenry__splash_section02). Rendered as a CSS background so a
+// missing/not-yet-pulled file degrades to the ambient gradient rather than a broken img.
+const BG_SRC = "/assets/marks/mark__hvn-havenry__splash_section02.png";
 
 export function ScrollStory() {
   const sectionRef = useRef<HTMLDivElement>(null);
