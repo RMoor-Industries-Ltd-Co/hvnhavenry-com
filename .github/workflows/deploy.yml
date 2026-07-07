@@ -85,5 +85,15 @@ jobs:
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
             docker compose up -d nginx
+
+            # Observability (safe: prints key NAMES/counts, never values): confirm
+            # the creds landed in the env file, and surface the container's startup
+            # asset-pull result right here in the deploy log.
+            echo "GDRIVE keys present in .env.local: $(grep -c '^GDRIVE_' .env.local 2>/dev/null || echo 0)"
+            sleep 5
+            echo "----- container assets:pull -----"
+            docker logs hvnhavenry_app 2>&1 | grep -i "assets:pull" | tail -20 || echo "(no assets:pull lines found)"
+            echo "---------------------------------"
+
             docker image prune -f
             echo "✓ Deployed at $(date)"
