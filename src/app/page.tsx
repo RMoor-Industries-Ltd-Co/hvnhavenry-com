@@ -23,12 +23,13 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Maps a DOM anchor to the nav section it activates. As each anchor's top
-// crosses the viewport center — scrolling either way — the stacked NavBar swaps.
-const NAV_SECTIONS = [
-  { id: "top", section: 0 },
-  { id: "story", section: 1 },
-  { id: "concierge", section: 2 },
+// Section boundaries for the stacked NavBar. Each boundary flips the active
+// section forward as its element reaches the top of the viewport, and back to
+// the previous one when scrolled above it again. The hero is section 0 by
+// default (no trigger needed — the first boundary's leaveBack restores it).
+const NAV_BOUNDARIES = [
+  { id: "story", enter: 1, leaveBack: 0 },
+  { id: "concierge", enter: 2, leaveBack: 1 },
 ];
 
 export default function Home() {
@@ -59,17 +60,19 @@ export default function Home() {
       });
     });
 
-    // Drive the stacked NavBar: activate a section when its anchor reaches center.
-    const navTriggers = NAV_SECTIONS.map(({ id, section }) => {
+    // Drive the stacked NavBar: each section takes over as it reaches the top,
+    // and hands back to the previous one when scrolled above again.
+    const navTriggers = NAV_BOUNDARIES.map(({ id, enter, leaveBack }) => {
       const el = document.getElementById(id);
       if (!el) return null;
       return ScrollTrigger.create({
         trigger: el,
-        start: "top center",
-        onEnter: () => setActiveNavSection(section),
-        onEnterBack: () => setActiveNavSection(section),
+        start: "top top",
+        onEnter: () => setActiveNavSection(enter),
+        onLeaveBack: () => setActiveNavSection(leaveBack),
       });
     });
+    // Recompute positions after the pinned ScrollStory registers its own trigger.
     ScrollTrigger.refresh();
 
     return () => {
