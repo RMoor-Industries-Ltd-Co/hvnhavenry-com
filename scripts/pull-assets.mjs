@@ -1,8 +1,13 @@
 // Pulls production assets from the HVN_HAVENRY_SITE Google Drive folder into public/,
 // per assets.manifest.json. See ASSETS.md for the naming convention and setup steps.
 //
-// No-ops (exit 0) when GDRIVE_ASSETS_CREDENTIALS isn't set, so this is safe to leave
-// out of every environment until the service account described in ASSETS.md exists.
+// Two credential paths (checked in this order):
+//   1. GDRIVE_ASSETS_CREDENTIALS — a service-account JSON key (dedicated read-only identity).
+//   2. GDRIVE_CLIENT_ID + GDRIVE_CLIENT_SECRET + GDRIVE_REFRESH_TOKEN — the same Google
+//      OAuth credentials ALLEN / MyTubeScript / creator-os already use (allen-i-verse
+//      Doppler). Lets this site reuse existing creds with no new GCP setup.
+//
+// No-ops (exit 0) when neither is configured, so it's safe to leave out of any environment.
 
 import { createWriteStream, mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -13,12 +18,39 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const MANIFEST_PATH = join(ROOT, "assets.manifest.json");
 const PUBLIC_DIR = join(ROOT, "public");
 
+const DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
+
+async function buildAuth(google) {
+  // 1. Service-account JSON key.
+  const serviceAccountRaw = process.env.GDRIVE_ASSETS_CREDENTIALS;
+  if (serviceAccountRaw) {
+    return new google.auth.GoogleAuth({
+      credentials: JSON.parse(serviceAccountRaw),
+      scopes: DRIVE_SCOPES,
+    });
+  }
+
+  // 2. OAuth credentials (same set ALLEN / MyTubeScript / creator-os use).
+  const clientId = process.env.GDRIVE_CLIENT_ID;
+  const clientSecret = process.env.GDRIVE_CLIENT_SECRET;
+  const refreshToken = process.env.GDRIVE_REFRESH_TOKEN;
+  if (clientId && clientSecret && refreshToken) {
+    const oauth = new google.auth.OAuth2(clientId, clientSecret);
+    oauth.setCredentials({ refresh_token: refreshToken });
+    return oauth;
+  }
+
+  return null;
+}
+
 async function main() {
-  const credentialsRaw = process.env.GDRIVE_ASSETS_CREDENTIALS;
-  if (!credentialsRaw) {
+  const { google } = await import("googleapis");
+  const auth = await buildAuth(google);
+  if (!auth) {
     console.warn(
-      "[assets:pull] GDRIVE_ASSETS_CREDENTIALS is not set — skipping asset pull. " +
-        "See ASSETS.md for one-time service-account setup."
+      "[assets:pull] No Drive credentials configured — skipping asset pull. " +
+        "Set GDRIVE_ASSETS_CREDENTIALS (service account) or " +
+        "GDRIVE_CLIENT_ID + GDRIVE_CLIENT_SECRET + GDRIVE_REFRESH_TOKEN (OAuth). See ASSETS.md."
     );
     return;
   }
@@ -29,12 +61,6 @@ async function main() {
     return;
   }
 
-  const { google } = await import("googleapis");
-  const credentials = JSON.parse(credentialsRaw);
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/drive.readonly"],
-  });
   const drive = google.drive({ version: "v3", auth });
 
   let failures = 0;

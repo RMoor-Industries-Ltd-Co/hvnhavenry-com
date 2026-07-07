@@ -179,9 +179,9 @@ entry to `assets.manifest.json`. Run `npm run assets:pull` to verify it resolves
 npm run assets:pull
 ```
 
-Reads `assets.manifest.json`, downloads each file from Drive via a service account, and
-writes it to `public/<destPath>`. **Silently no-ops (exit 0) if `GDRIVE_ASSETS_CREDENTIALS`
-isn't set** — safe for local dev machines and any CI job that doesn't need fresh assets.
+Reads `assets.manifest.json`, downloads each file from Drive, and writes it to
+`public/<destPath>`. **Silently no-ops (exit 0) if no Drive credentials are set** — safe
+for local dev machines and any CI job that doesn't need fresh assets.
 
 Pulled files are gitignored (see `.gitignore`) — `public/` on disk is a build artifact,
 not a source file, for anything under `public/assets/` or in the brand-slot list above.
@@ -197,18 +197,23 @@ were needed live before that setup work was done. They're explicitly un-ignored 
 `assets.manifest.json` pointing at the same Drive files, so the pull will overwrite them
 with identical content.
 
-### One-time setup required (not yet done)
+### Credentials — two options (checked in this order)
 
-The pull script needs a **Google Cloud service account** with read access to the
-`HVN_HAVENRY_SITE` Drive folder:
+1. **OAuth — reuse existing creds, no GCP setup (recommended).** Set `GDRIVE_CLIENT_ID`,
+   `GDRIVE_CLIENT_SECRET`, and `GDRIVE_REFRESH_TOKEN` — the **same** Google OAuth values
+   ALLEN / MyTubeScript / creator-os already use (they live in the `allen-i-verse` Doppler
+   project, `prd` config). Copy those three into this project's environment. The only
+   requirement is that that OAuth identity (rahm@rmasters.group) has read access to
+   `HVN_HAVENRY_SITE` — which it does, since the folder lives in that workspace.
+2. **Service account — dedicated read-only identity (optional).** Set
+   `GDRIVE_ASSETS_CREDENTIALS` to a service-account JSON key. Cleaner separation, but needs
+   the one-time GCP setup below:
+   1. Create a service account in the relevant GCP project, generate a JSON key.
+   2. Share the `HVN_HAVENRY_SITE` Drive folder with the service account's `client_email`
+      as **Viewer**.
+   3. Store the JSON key contents as the `GDRIVE_ASSETS_CREDENTIALS` secret.
 
-1. Create a service account in the relevant GCP project, generate a JSON key.
-2. Share the `HVN_HAVENRY_SITE` Drive folder with the service account's `client_email`
-   as **Viewer**.
-3. Store the JSON key contents as the `GDRIVE_ASSETS_CREDENTIALS` secret (Doppler for
-   local/manual runs; a GitHub Actions secret if/when this gets wired into CI).
-
-Until that secret exists, `npm run assets:pull` is a documented no-op — the manifest and
+Until one of these is set, `npm run assets:pull` is a documented no-op — the manifest and
 script are ready, but nothing will actually download.
 
 ### Wiring into CI/deploy (not yet done)
