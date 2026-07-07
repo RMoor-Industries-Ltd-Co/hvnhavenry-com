@@ -56,7 +56,7 @@ export function ScrollStory() {
         tl.fromTo(
           bgRef.current,
           { opacity: 0, yPercent: -6, scale: 1.08 },
-          { opacity: 0.4, yPercent: 6, scale: 1, ease: "none" },
+          { opacity: 0.92, yPercent: 6, scale: 1, ease: "none" },
           0
         );
       }
@@ -126,9 +126,10 @@ export function ScrollStory() {
         style={{ backgroundImage: `url(${BG_SRC})` }}
       />
 
-      {/* Ambient vignette — always present, so the section reads even with no image */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0d0b09] via-[#0d0b09]/40 to-[#0d0b09] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,169,110,0.06),_transparent_60%)] pointer-events-none" />
+      {/* Light legibility scrim — keeps the manifesto readable without hazing the
+          image. Feathered top/bottom so the background eases in and out cleanly. */}
+      <div className="absolute inset-0 bg-[#0d0b09]/35 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0d0b09]/70 via-transparent to-[#0d0b09]/80 pointer-events-none" />
 
       <div className="relative w-full max-w-4xl px-8 text-center">
         {BEATS.map((beat, i) => (
