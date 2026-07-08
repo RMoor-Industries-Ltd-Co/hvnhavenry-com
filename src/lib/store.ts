@@ -10,11 +10,10 @@ interface HavenStore {
   activeTabItem: ProductId | null;
   setActiveTabItem: (id: ProductId | null) => void;
 
-  // Section 4 — collapsible video reveal
-  isVideoOpen: boolean;
+  // Section 4 — always-open promo / film player. null = the default promo reel.
   activeVideoProduct: ProductId | null;
   openVideo: (id: ProductId) => void;
-  closeVideo: () => void;
+  resetVideo: () => void;
 
   // Shared smooth-scroll handle (set once Lenis is initialized on the page)
   scrollToSection: ((id: string) => void) | null;
@@ -38,10 +37,9 @@ export const useHavenStore = create<HavenStore>((set) => ({
   activeTabItem: null,
   setActiveTabItem: (id) => set({ activeTabItem: id }),
 
-  isVideoOpen: false,
   activeVideoProduct: null,
-  openVideo: (id) => set({ isVideoOpen: true, activeVideoProduct: id }),
-  closeVideo: () => set({ isVideoOpen: false }),
+  openVideo: (id) => set({ activeVideoProduct: id }),
+  resetVideo: () => set({ activeVideoProduct: null }),
 
   scrollToSection: null,
   setScrollToSection: (fn) => set({ scrollToSection: fn }),

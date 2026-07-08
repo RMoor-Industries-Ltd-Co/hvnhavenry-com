@@ -1,12 +1,11 @@
 "use client";
 
 import { useHavenStore } from "@/lib/store";
-import { COLLECTION_ORDER, getProductsByCollection, PRODUCTS } from "@/lib/products";
+import { getProductsByCollection, PRODUCTS } from "@/lib/products";
 import { ProductInfoPanel } from "./ProductInfoPanel";
 
 export function RoomTabs() {
   const activeCollection = useHavenStore((s) => s.activeCollection);
-  const setActiveCollection = useHavenStore((s) => s.setActiveCollection);
   const activeTabItem = useHavenStore((s) => s.activeTabItem);
   const setActiveTabItem = useHavenStore((s) => s.setActiveTabItem);
 
@@ -14,35 +13,9 @@ export function RoomTabs() {
   const gradientColors = items.length > 0 ? items.map((p) => p.accentColor) : ["#0d0b09", "#1a1510"];
 
   return (
-    <section id="the-room" className="relative w-full bg-[#0d0b09]">
-      {/* Eyebrow */}
-      <div className="pt-24 pb-8 flex justify-center">
-        <p className="text-[#c9a96e] opacity-40 text-xs tracking-[0.5em] uppercase font-sans">
-          The Collection
-        </p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap items-center justify-center gap-4 md:gap-10 px-8 pb-10">
-        {COLLECTION_ORDER.map((collection) => (
-          <button
-            key={collection}
-            onClick={() => setActiveCollection(collection)}
-            className={`relative text-xs md:text-sm tracking-[0.25em] uppercase font-sans pb-3 transition-colors duration-300 cursor-pointer ${
-              activeCollection === collection
-                ? "text-[#c9a96e]"
-                : "text-[#e8dcc8] opacity-40 hover:opacity-70"
-            }`}
-          >
-            {collection}
-            <span
-              className={`absolute left-0 right-0 -bottom-px h-px bg-[#c9a96e] transition-transform duration-500 origin-center ${
-                activeCollection === collection ? "scale-x-100" : "scale-x-0"
-              }`}
-            />
-          </button>
-        ))}
-      </div>
+    <section id="the-room" className="relative w-full bg-[#0d0b09] pt-24">
+      {/* Collection nav lives in the fixed top NavBar (section-3 row) — no duplicate
+          header here. Section top padding keeps the room clear of the pinned nav. */}
 
       {/* Room stage */}
       <div className="relative h-[85vh] w-full overflow-hidden">
