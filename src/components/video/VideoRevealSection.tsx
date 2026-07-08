@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useHavenStore } from "@/lib/store";
 import { PRODUCTS } from "@/lib/products";
 
-// Default promo reel — supplied via the asset pipeline (user provides the file).
-// Missing/not-yet-pulled assets degrade to the empty frame rather than a broken tag.
+// Default promo reel — pulled via the asset pipeline (video__promo__default).
+// A missing/not-yet-pulled file degrades to the empty frame rather than a broken tag.
 const PROMO_SRC = "/assets/video/video__promo__default.mp4";
-const PROMO_POSTER = "/assets/video/video__promo__default.png";
 
 export function VideoRevealSection() {
   const activeVideoProduct = useHavenStore((s) => s.activeVideoProduct);
@@ -76,7 +75,6 @@ export function VideoRevealSection() {
             <video
               className="absolute inset-0 h-full w-full object-cover"
               src={PROMO_SRC}
-              poster={PROMO_POSTER}
               autoPlay
               muted
               loop
