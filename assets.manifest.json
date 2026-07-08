@@ -40,6 +40,11 @@
       "driveFileId": "1BUa18ZCdUh7AURTV9r_bzFDJQai8HlHL",
       "name": "mark__hvn-havenry__splash_section02.png",
       "destPath": "assets/marks/mark__hvn-havenry__splash_section02.png"
+    },
+    {
+      "driveFileId": "1otir-GnvwU6qtFx_Ve5sb0cRyb3Z_JbX",
+      "name": "video__promo__default.mp4",
+      "destPath": "assets/video/video__promo__default.mp4"
     }
   ]
 }
