@@ -19,9 +19,14 @@ export function RoomTabs() {
 
       {/* Room stage */}
       <div className="relative h-[85vh] w-full overflow-hidden">
+        {/* Showroom background (placeholder: hero__great-room__day). */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(/assets/hero/hero__great-room__day.png)` }}
+        />
         <div
           key={activeCollection}
-          className="absolute inset-0 animate-fade-up"
+          className="absolute inset-0 animate-fade-up opacity-40 mix-blend-multiply"
           style={{ background: `linear-gradient(135deg, ${gradientColors.join(", ")})` }}
         >
           {/* Texture overlay */}
