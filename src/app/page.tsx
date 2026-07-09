@@ -105,8 +105,6 @@ export default function Home() {
       {/* Hero */}
       <section id="top" className="relative h-screen w-full overflow-hidden">
         <HeroBackground />
-        {/* Ambient incense smoke rising from the lower left (easily repositioned) */}
-        <SmokeStream className="absolute bottom-0 left-[20%] w-16 h-80 z-10" />
         <HeroOverlay />
       </section>
 
@@ -118,6 +116,12 @@ export default function Home() {
       {/* Section 3: Interactive room tabs — the concierge / shopping destination */}
       <div id="concierge">
         <RoomTabs />
+      </div>
+
+      {/* Smoke divider — a rising incense plume marks the seam from showroom (S3)
+          into the video (S4). overflow-visible lets the smoke bleed across both. */}
+      <div className="relative h-28 w-full bg-[#0d0b09] flex justify-center overflow-visible">
+        <SmokeStream className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-[26rem] z-10" />
       </div>
 
       {/* Section 4: Collapsible video reveal */}
