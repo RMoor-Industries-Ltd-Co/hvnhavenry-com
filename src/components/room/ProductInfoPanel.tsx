@@ -27,8 +27,9 @@ export function ProductInfoPanel({ product, onClose }: ProductInfoPanelProps) {
     >
       {product && (
         <>
-          {/* Scrollable content — grows/scrolls independently of the close strip. */}
-          <div className="flex-1 overflow-y-auto px-8 pt-12 pb-6">
+          {/* Scrollable content — top padding keeps the details clear of the fixed
+              top nav; scrolls independently of the close strip below. */}
+          <div className="flex-1 overflow-y-auto px-8 pt-28 pb-6">
             <p className="text-[#c9a96e] text-xs tracking-[0.4em] uppercase font-sans mb-4 opacity-70">
               {product.roomPosition}
             </p>

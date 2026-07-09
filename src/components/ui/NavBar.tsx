@@ -20,6 +20,7 @@ export function NavBar() {
   const scrollToSection = useHavenStore((s) => s.scrollToSection);
   const activeCollection = useHavenStore((s) => s.activeCollection);
   const setActiveCollection = useHavenStore((s) => s.setActiveCollection);
+  const resetVideo = useHavenStore((s) => s.resetVideo);
 
   const go = (id: string) => () => scrollToSection?.(id);
 
@@ -88,6 +89,19 @@ export function NavBar() {
             ))}
           </div>
         </div>
+
+        {/* S4 (video) — the collection nav is pushed away; only a return control remains */}
+        <div className={`${rowBase} flex items-center justify-center ${rowState(3, activeNavSection)}`}>
+          <button
+            onClick={() => {
+              resetVideo();
+              scrollToSection?.("the-room");
+            }}
+            className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] opacity-80 hover:opacity-100 transition-opacity duration-300 font-sans cursor-pointer"
+          >
+            ← Return to Showroom
+          </button>
+        </div>
       </div>
 
       {/* Right CTA — Speak to Concierge (S1) / hidden (S2) / View Cart (S3). Padded off edge. */}
@@ -96,7 +110,7 @@ export function NavBar() {
           flanksHidden ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        {activeNavSection === 2 ? (
+        {activeNavSection >= 2 ? (
           <a
             href={CART_URL}
             className="text-xs tracking-[0.2em] uppercase text-[#c9a96e] opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-pointer font-sans whitespace-nowrap"
