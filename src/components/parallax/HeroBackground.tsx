@@ -1,11 +1,8 @@
 export function HeroBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#0d0b09]">
-      {/* Hero photograph (pulled from Drive: hero__hvn-havenry__section01). */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(/assets/hero/hero__hvn-havenry__section01.png)` }}
-      />
+      {/* Hero photograph (hero__hvn-havenry__section01) — WebP with PNG fallback. */}
+      <div className="absolute inset-0 bg-cover bg-center bg-asset-hero01" />
 
       {/* Bottom scrim only — keeps the hero copy legible without hazing the image. */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b09]/85 via-[#0d0b09]/15 to-transparent" />

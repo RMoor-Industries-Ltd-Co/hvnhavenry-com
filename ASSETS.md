@@ -229,3 +229,14 @@ The OAuth path is dependency-free (built-in `fetch`), so it runs in the slim sta
 runtime image without bundling `googleapis`. To activate live asset pulling, just ensure
 `GDRIVE_CLIENT_ID` / `GDRIVE_CLIENT_SECRET` / `GDRIVE_REFRESH_TOKEN` are in the deploy
 environment (Doppler) — nothing else to change.
+
+### Automatic WebP optimization (fallback)
+
+After pulling, `scripts/pull-assets.mjs` best-effort transcodes each pulled PNG/JPG to a
+`.webp` sibling (via `sharp`, installed in the runtime image). CSS backgrounds reference the
+image via `image-set()` (`.bg-asset-*` classes in `globals.css`) which prefers the WebP and
+falls back to the original PNG — so the site works whether or not the WebP was generated.
+This means an unoptimized image dropped in Drive is still served small automatically. If you
+provide already-optimized files under the same names, that's the primary path and the WebP
+step just mirrors them. `sharp` install and each encode are best-effort: any failure is
+skipped and the original is served.

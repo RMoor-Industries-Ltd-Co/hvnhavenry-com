@@ -120,3 +120,30 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(201, 169, 110, 0.2);
 }
+
+/* Asset backgrounds with automatic WebP + PNG fallback.
+   The first `background-image` (PNG) is the guaranteed fallback; browsers that
+   understand image-set use the WebP when the pull step has generated it. Both
+   declarations point at the same base name so it works whether or not the WebP
+   sibling exists. */
+.bg-asset-hero01 {
+  background-image: url("/assets/hero/hero__hvn-havenry__section01.png");
+  background-image: image-set(
+    url("/assets/hero/hero__hvn-havenry__section01.webp") type("image/webp"),
+    url("/assets/hero/hero__hvn-havenry__section01.png") type("image/png")
+  );
+}
+.bg-asset-splash02 {
+  background-image: url("/assets/marks/mark__hvn-havenry__splash_section02.png");
+  background-image: image-set(
+    url("/assets/marks/mark__hvn-havenry__splash_section02.webp") type("image/webp"),
+    url("/assets/marks/mark__hvn-havenry__splash_section02.png") type("image/png")
+  );
+}
+.bg-asset-room-day {
+  background-image: url("/assets/hero/hero__great-room__day.png");
+  background-image: image-set(
+    url("/assets/hero/hero__great-room__day.webp") type("image/webp"),
+    url("/assets/hero/hero__great-room__day.png") type("image/png")
+  );
+}

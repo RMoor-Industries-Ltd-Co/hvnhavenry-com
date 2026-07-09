@@ -19,11 +19,8 @@ export function RoomTabs() {
 
       {/* Room stage */}
       <div className="relative h-[85vh] w-full overflow-hidden">
-        {/* Showroom background (placeholder: hero__great-room__day). */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(/assets/hero/hero__great-room__day.png)` }}
-        />
+        {/* Showroom background (placeholder: hero__great-room__day) — WebP w/ PNG fallback. */}
+        <div className="absolute inset-0 bg-cover bg-center bg-asset-room-day" />
         <div
           key={activeCollection}
           className="absolute inset-0 animate-fade-up opacity-40 mix-blend-multiply"
