@@ -9,6 +9,7 @@ import { NavBar } from "@/components/ui/NavBar";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
+import { SmokeStream } from "@/components/parallax/SmokeStream";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
 import { RoomTabs } from "@/components/room/RoomTabs";
 import { VideoRevealSection } from "@/components/video/VideoRevealSection";
@@ -104,6 +105,8 @@ export default function Home() {
       {/* Hero */}
       <section id="top" className="relative h-screen w-full overflow-hidden">
         <HeroBackground />
+        {/* Ambient incense smoke rising from the lower left (easily repositioned) */}
+        <SmokeStream className="absolute bottom-0 left-[20%] w-16 h-80 z-10" />
         <HeroOverlay />
       </section>
 

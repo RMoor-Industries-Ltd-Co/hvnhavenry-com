@@ -147,3 +147,29 @@ body {
     url("/assets/hero/hero__great-room__day.png") type("image/png")
   );
 }
+
+/* Rising smoke wisp — an ambient incense-style stream. Pure CSS, GPU-friendly
+   (transform/opacity only). Puffs are staggered to read as a continuous stream. */
+@keyframes smoke-rise {
+  0%   { transform: translateY(0) translateX(0) scale(0.35); opacity: 0; }
+  12%  { opacity: 0.30; }
+  55%  { opacity: 0.22; }
+  100% { transform: translateY(-280px) translateX(26px) scale(1.7); opacity: 0; }
+}
+.smoke-puff {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(232, 220, 200, 0.55), rgba(232, 220, 200, 0) 68%);
+  filter: blur(11px);
+  opacity: 0;
+  animation: smoke-rise 7s linear infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .smoke-puff { animation: none; opacity: 0; }
+}
