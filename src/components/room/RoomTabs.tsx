@@ -10,7 +10,6 @@ export function RoomTabs() {
   const setActiveTabItem = useHavenStore((s) => s.setActiveTabItem);
 
   const items = getProductsByCollection(activeCollection);
-  const gradientColors = items.length > 0 ? items.map((p) => p.accentColor) : ["#0d0b09", "#1a1510"];
 
   return (
     <section id="the-room" className="relative w-full bg-[#0d0b09] pt-24">
@@ -21,23 +20,12 @@ export function RoomTabs() {
       <div className="relative h-[85vh] w-full overflow-hidden">
         {/* Showroom background (placeholder: hero__great-room__day) — WebP w/ PNG fallback. */}
         <div className="absolute inset-0 bg-cover bg-center bg-asset-room-day" />
-        <div
-          key={activeCollection}
-          className="absolute inset-0 animate-fade-up opacity-40 mix-blend-multiply"
-          style={{ background: `linear-gradient(135deg, ${gradientColors.join(", ")})` }}
-        >
-          {/* Texture overlay */}
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(201,169,110,0.03) 2px, rgba(201,169,110,0.03) 4px)`,
-            }}
-          />
-          {/* Vignette */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0d0b09] via-transparent to-[#0d0b09] opacity-70" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#0d0b09_95%)] opacity-60" />
 
-          {/* Hotspots */}
+        {/* Soft edge vignette only — mostly transparent so the room reads clearly. */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_62%,rgba(13,11,9,0.5)_100%)]" />
+
+        {/* Hotspots — rendered directly over the image (keyed for the fade on tab change) */}
+        <div key={activeCollection} className="absolute inset-0 animate-fade-up">
           {items.map((product) => (
             <button
               key={product.id}
