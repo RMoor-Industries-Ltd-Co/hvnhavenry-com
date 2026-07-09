@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+import Snap from "lenis/snap";
 import { NavBar } from "@/components/ui/NavBar";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
@@ -67,7 +68,9 @@ export default function Home() {
       if (!el) return null;
       return ScrollTrigger.create({
         trigger: el,
-        start: "top top",
+        // Activate as the section enters view (not only when it pins to the very top),
+        // so the S3 nav row is present as the showroom arrives.
+        start: "top 60%",
         onEnter: () => setActiveNavSection(enter),
         onLeaveBack: () => setActiveNavSection(leaveBack),
       });
@@ -75,8 +78,18 @@ export default function Home() {
     // Recompute positions after the pinned ScrollStory registers its own trigger.
     ScrollTrigger.refresh();
 
+    // Real snapping (CSS scroll-snap doesn't work under Lenis). Snap only to the
+    // showroom (S3) and video (S4) so users settle on them; hero + pinned story are
+    // left free. Registered after refresh so element offsets are correct.
+    const snap = new Snap(lenis, { type: "proximity", lerp: 0.1 });
+    ["the-room", "film-section"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) snap.addElement(el, { align: "start" });
+    });
+
     return () => {
       cancelAnimationFrame(rafId);
+      snap.destroy();
       lenis.destroy();
       navTriggers.forEach((t) => t?.kill());
       ScrollTrigger.getAll().forEach((t) => t.kill());

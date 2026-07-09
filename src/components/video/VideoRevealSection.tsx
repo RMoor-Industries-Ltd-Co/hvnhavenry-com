@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHavenStore } from "@/lib/store";
 import { PRODUCTS } from "@/lib/products";
 
@@ -18,6 +18,30 @@ export function VideoRevealSection() {
   // A requested product film always shows the ✕ (the return label is promo-only).
   const [showBack, setShowBack] = useState(false);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Perf: the promo is heavy, so it is NOT fetched on page load (preload="none").
+  // Only load + play once the section scrolls into view; pause when it leaves.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
+
   const handleExit = () => {
     resetVideo();
     setShowBack(true);
@@ -29,6 +53,7 @@ export function VideoRevealSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="film-section"
       className="relative w-full min-h-screen bg-[#0d0b09] flex items-center justify-center overflow-hidden px-8 py-24"
     >
@@ -70,12 +95,13 @@ export function VideoRevealSection() {
             </p>
           </>
         ) : (
-          /* Default promo reel. */
+          /* Default promo reel — lazy-loaded, plays only in view. */
           <>
             <video
+              ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
               src={PROMO_SRC}
-              autoPlay
+              preload="none"
               muted
               loop
               playsInline

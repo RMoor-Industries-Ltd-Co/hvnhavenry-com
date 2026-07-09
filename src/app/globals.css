@@ -22,21 +22,8 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scroll-snap for the showroom (Section 3) and the video player (Section 4) so each
-   settles fully into view and the user isn't dropped past them into the footer.
-   `proximity` keeps the hero and the pinned scroll-story free (they have no snap
-   points); only #the-room and #film-section snap. Desktop only — leave touch scroll
-   on small screens unconstrained. */
-@media (min-width: 768px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-  #the-room,
-  #film-section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
-}
+/* Snapping to the showroom (S3) and video (S4) is handled by Lenis Snap in page.tsx —
+   CSS scroll-snap does not work with Lenis's JS-driven scroll. */
 
 body {
   font-family: var(--font-inter), system-ui, sans-serif;
