@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import Snap from "lenis/snap";
 import { NavBar } from "@/components/ui/NavBar";
+import { GoldenDivider } from "@/components/ui/GoldenDivider";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
@@ -31,6 +31,7 @@ if (typeof window !== "undefined") {
 const NAV_BOUNDARIES = [
   { id: "story", enter: 1, leaveBack: 0 },
   { id: "concierge", enter: 2, leaveBack: 1 },
+  { id: "film-section", enter: 3, leaveBack: 2 },
 ];
 
 export default function Home() {
@@ -78,18 +79,50 @@ export default function Home() {
     // Recompute positions after the pinned ScrollStory registers its own trigger.
     ScrollTrigger.refresh();
 
-    // Real snapping (CSS scroll-snap doesn't work under Lenis). Snap only to the
-    // showroom (S3) and video (S4) so users settle on them; hero + pinned story are
-    // left free. Registered after refresh so element offsets are correct.
-    const snap = new Snap(lenis, { type: "proximity", lerp: 0.1 });
-    ["the-room", "film-section"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) snap.addElement(el, { align: "start" });
-    });
+    // Snap the showroom (S3) and video (S4) into place once scrolling settles, using
+    // the SAME -80 offset the nav buttons use so the resting spot matches exactly (the
+    // "perfect position"). Only engages when already near one of them — the hero and
+    // pinned story scroll freely, and this always resettles to the correct spot.
+    const SNAP_IDS = ["the-room", "film-section"];
+    const NAV_OFFSET = 80;
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    let snapping = false;
+    const considerSnap = () => {
+      if (snapping) return;
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        const y = window.scrollY;
+        const vh = window.innerHeight;
+        let bestY: number | null = null;
+        let bestDist = Infinity;
+        for (const id of SNAP_IDS) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const targetY = Math.max(0, el.getBoundingClientRect().top + window.scrollY - NAV_OFFSET);
+          const dist = Math.abs(targetY - y);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestY = targetY;
+          }
+        }
+        // Snap only when clearly near a section (within ~45% of the viewport), and not
+        // already settled there.
+        if (bestY !== null && bestDist > 2 && bestDist < vh * 0.45) {
+          snapping = true;
+          lenis.scrollTo(bestY, {
+            duration: 0.8,
+            onComplete: () => {
+              snapping = false;
+            },
+          });
+        }
+      }, 140);
+    };
+    lenis.on("scroll", considerSnap);
 
     return () => {
       cancelAnimationFrame(rafId);
-      snap.destroy();
+      clearTimeout(settleTimer);
       lenis.destroy();
       navTriggers.forEach((t) => t?.kill());
       ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -107,28 +140,26 @@ export default function Home() {
         <HeroOverlay />
       </section>
 
+      <GoldenDivider />
+
       {/* Section 2: Scroll-pinned story */}
       <div id="story">
         <ScrollStory />
       </div>
+
+      <GoldenDivider />
 
       {/* Section 3: Interactive room tabs — the concierge / shopping destination */}
       <div id="concierge">
         <RoomTabs />
       </div>
 
-      {/* Golden section divider — marks the seam from the showroom (S3) into the
-          video (S4): a fading gold line with a small diamond at center. */}
-      <div className="w-full bg-[#0d0b09] py-14 flex items-center justify-center">
-        <div className="flex items-center gap-4 w-full max-w-xl px-8">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c9a96e]/60" />
-          <span className="w-2 h-2 rotate-45 border border-[#c9a96e]/70 bg-[#c9a96e]/20" />
-          <span className="h-px flex-1 bg-gradient-to-r from-[#c9a96e]/60 to-transparent" />
-        </div>
-      </div>
+      <GoldenDivider />
 
-      {/* Section 4: Collapsible video reveal */}
+      {/* Section 4: Video reveal (return is via the nav's "Return to Showroom") */}
       <VideoRevealSection />
+
+      <GoldenDivider />
 
       {/* Section 5: Footer */}
       <footer className="border-t border-[#c9a96e]/10 pt-16 pb-10 px-8 lg:px-16 bg-[#0d0b09]">

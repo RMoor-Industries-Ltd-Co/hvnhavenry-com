@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useHavenStore } from "@/lib/store";
 import { PRODUCTS } from "@/lib/products";
 
@@ -10,19 +10,13 @@ const PROMO_SRC = "/assets/video/video__promo__default.mp4";
 
 export function VideoRevealSection() {
   const activeVideoProduct = useHavenStore((s) => s.activeVideoProduct);
-  const resetVideo = useHavenStore((s) => s.resetVideo);
-  const scrollToSection = useHavenStore((s) => s.scrollToSection);
   const product = activeVideoProduct ? PRODUCTS[activeVideoProduct] : null;
-
-  // Two-state exit control: ✕ returns to the promo, then "Back to Showroom" scrolls up.
-  // A requested product film always shows the ✕ (the return label is promo-only).
-  const [showBack, setShowBack] = useState(false);
 
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Perf: the promo is heavy, so it is NOT fetched on page load (preload="none").
-  // Only load + play once the section scrolls into view; pause when it leaves.
+  // Perf: the promo is heavy (preload="none"). Only load + play once the section
+  // scrolls into view; pause when it leaves. Re-attaches when the promo remounts.
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
@@ -30,26 +24,14 @@ export function VideoRevealSection() {
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
       },
       { threshold: 0.35 }
     );
     io.observe(section);
     return () => io.disconnect();
-  }, []);
-
-  const handleExit = () => {
-    resetVideo();
-    setShowBack(true);
-  };
-  const handleBackToShowroom = () => {
-    scrollToSection?.("the-room");
-    setShowBack(false);
-  };
+  }, [activeVideoProduct]);
 
   return (
     <section
@@ -57,26 +39,8 @@ export function VideoRevealSection() {
       id="film-section"
       className="relative w-full min-h-screen bg-[#0d0b09] flex items-center justify-center overflow-hidden px-8 py-24"
     >
-      {/* Exit / return control — always visible, top-right */}
-      <div className="absolute top-8 right-8 z-10">
-        {showBack && !product ? (
-          <button
-            onClick={handleBackToShowroom}
-            className="text-[#c9a96e] opacity-80 hover:opacity-100 transition-opacity text-xs tracking-[0.3em] uppercase font-sans cursor-pointer"
-          >
-            ← Back to Showroom
-          </button>
-        ) : (
-          <button
-            onClick={handleExit}
-            aria-label="Exit film"
-            className="text-[#c9a96e] opacity-70 hover:opacity-100 transition-opacity text-lg font-sans cursor-pointer leading-none"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
+      {/* Return from the film lives in the top nav ("Return to Showroom") — no ✕ here,
+          which could be mistaken for closing/dismissing the player. */}
       <div className="relative w-full max-w-5xl aspect-video border border-[#c9a96e]/20 bg-[#151210] flex items-center justify-center overflow-hidden">
         {product ? (
           /* Requested product film (real per-product films wire in later). */
