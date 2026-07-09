@@ -9,7 +9,6 @@ import { NavBar } from "@/components/ui/NavBar";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
-import { SmokeStream } from "@/components/parallax/SmokeStream";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
 import { RoomTabs } from "@/components/room/RoomTabs";
 import { VideoRevealSection } from "@/components/video/VideoRevealSection";
@@ -118,10 +117,14 @@ export default function Home() {
         <RoomTabs />
       </div>
 
-      {/* Smoke divider — a rising incense plume marks the seam from showroom (S3)
-          into the video (S4). overflow-visible lets the smoke bleed across both. */}
-      <div className="relative h-28 w-full bg-[#0d0b09] flex justify-center overflow-visible">
-        <SmokeStream className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-[26rem] z-10" />
+      {/* Golden section divider — marks the seam from the showroom (S3) into the
+          video (S4): a fading gold line with a small diamond at center. */}
+      <div className="w-full bg-[#0d0b09] py-14 flex items-center justify-center">
+        <div className="flex items-center gap-4 w-full max-w-xl px-8">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c9a96e]/60" />
+          <span className="w-2 h-2 rotate-45 border border-[#c9a96e]/70 bg-[#c9a96e]/20" />
+          <span className="h-px flex-1 bg-gradient-to-r from-[#c9a96e]/60 to-transparent" />
+        </div>
       </div>
 
       {/* Section 4: Collapsible video reveal */}
