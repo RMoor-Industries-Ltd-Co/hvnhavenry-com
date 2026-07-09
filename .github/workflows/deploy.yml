@@ -84,7 +84,9 @@ jobs:
             # force-recreate so the container picks up the refreshed env file and
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
-            docker compose up -d nginx
+            # Recreate nginx too so it picks up any nginx.conf changes (the mounted
+            # file changes on git reset but compose won't reload it otherwise).
+            docker compose up -d --force-recreate nginx
 
             # Observability (safe: prints key NAMES/counts, never values): confirm
             # the creds landed in the env file, and surface the container's startup
