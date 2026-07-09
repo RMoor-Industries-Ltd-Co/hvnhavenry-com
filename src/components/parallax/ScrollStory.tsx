@@ -25,10 +25,9 @@ const BEATS: Beat[] = [
   { text: "Atmospheric Jurisdiction is the philosophy that a space and its atmosphere should be intentionally governed.", final: true },
 ];
 
-// Background brand splash — pulled from Drive via the asset pipeline
-// (mark__hvn-havenry__splash_section02). Rendered as a CSS background so a
-// missing/not-yet-pulled file degrades to the ambient gradient rather than a broken img.
-const BG_SRC = "/assets/marks/mark__hvn-havenry__splash_section02.png";
+// Background brand splash (mark__hvn-havenry__splash_section02) is applied via the
+// `.bg-asset-splash02` class (WebP with PNG fallback); a missing/not-yet-pulled file
+// simply degrades to the ambient gradient rather than a broken image.
 
 export function ScrollStory() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -119,11 +118,10 @@ export function ScrollStory() {
       ref={sectionRef}
       className="relative h-screen w-full overflow-hidden bg-[#0d0b09] flex items-center justify-center"
     >
-      {/* Parallax brand background (fades before the next section) */}
+      {/* Parallax brand background (fades before the next section) — WebP w/ PNG fallback */}
       <div
         ref={bgRef}
-        className="absolute inset-0 bg-cover bg-center opacity-0 pointer-events-none"
-        style={{ backgroundImage: `url(${BG_SRC})` }}
+        className="absolute inset-0 bg-cover bg-center opacity-0 pointer-events-none bg-asset-splash02"
       />
 
       {/* Light legibility scrim — keeps the manifesto readable without hazing the

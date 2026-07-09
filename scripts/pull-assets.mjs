@@ -113,11 +113,13 @@ async function main() {
   }
 
   let failures = 0;
+  const pulled = [];
   for (const asset of assets) {
     const destPath = join(PUBLIC_DIR, asset.destPath);
     try {
       mkdirSync(dirname(destPath), { recursive: true });
       await download(asset, destPath);
+      pulled.push(destPath);
       console.log(`[assets:pull] ${asset.name} -> public/${asset.destPath}`);
     } catch (err) {
       failures += 1;
@@ -125,9 +127,37 @@ async function main() {
     }
   }
 
+  await optimizeToWebp(pulled);
+
   if (failures > 0) {
     console.error(`[assets:pull] ${failures} of ${assets.length} asset(s) failed to pull.`);
     process.exitCode = 1;
+  }
+}
+
+// Best-effort: generate a WebP sibling for each pulled PNG/JPG so unoptimized source
+// images are still served small. Fully optional — if `sharp` isn't installed (or an
+// encode fails) it is skipped, and the CSS `image-set()` falls back to the original.
+async function optimizeToWebp(paths) {
+  const rasters = paths.filter((p) => /\.(png|jpe?g)$/i.test(p));
+  if (rasters.length === 0) return;
+
+  let sharp;
+  try {
+    sharp = (await import("sharp")).default;
+  } catch {
+    console.warn("[assets:pull] sharp not installed — skipping WebP optimization (serving originals).");
+    return;
+  }
+
+  for (const src of rasters) {
+    const out = src.replace(/\.(png|jpe?g)$/i, ".webp");
+    try {
+      await sharp(src).webp({ quality: 78 }).toFile(out);
+      console.log(`[assets:pull] webp ${out.replace(PUBLIC_DIR + "/", "public/")}`);
+    } catch (err) {
+      console.warn(`[assets:pull] webp skip ${src}: ${err.message}`);
+    }
   }
 }
 

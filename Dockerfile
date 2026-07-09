@@ -36,6 +36,13 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/scripts/pull-assets.mjs ./scripts/pull-assets.mjs
 COPY --from=builder /app/scripts/start.sh ./scripts/start.sh
 COPY --from=builder /app/assets.manifest.json ./assets.manifest.json
+
+# Optional: sharp powers the best-effort PNG/JPG -> WebP optimization in the pull
+# step. Best-effort install — if it fails, the build still succeeds and the pull
+# simply skips WebP (CSS image-set falls back to the original PNG).
+RUN npm install --no-save --no-audit --no-fund sharp@^0.33 \
+    || echo "[build] sharp unavailable; WebP optimization will be skipped at runtime"
+
 RUN chown -R nextjs:nodejs /app/public /app/scripts
 
 USER nextjs
