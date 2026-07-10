@@ -43,8 +43,13 @@
     },
     {
       "driveFileId": "1otir-GnvwU6qtFx_Ve5sb0cRyb3Z_JbX",
-      "name": "video__promo__default.mp4",
-      "destPath": "assets/video/video__promo__default.mp4"
+      "name": "video__promo__default__01.mp4",
+      "destPath": "assets/video/video__promo__default__01.mp4"
+    },
+    {
+      "driveFileId": "1IkP3c8Bfv6p__pWjpNcimiotCgAkkGx3",
+      "name": "video__promo__default__02.mp4",
+      "destPath": "assets/video/video__promo__default__02.mp4"
     }
   ]
 }
