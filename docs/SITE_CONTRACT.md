@@ -75,10 +75,19 @@ with `hasVideo` show **Watch the Film**.
 
 CSS scroll-snap does **not** work under Lenis — do not use it. Snapping is a custom
 scroll-settle handler that, 140 ms after scrolling stops, snaps to the nearest of
-`the-room` / `film-section` **using the same `-80` offset** (so it rests exactly where the
-buttons land). Guards: it never fires during a `snapping` glide or a `programmaticScroll`
-(button-driven) scroll — this is what keeps "Watch the Film" and other buttons landing
-on-position. Only S3/S4 snap; the hero and pinned story scroll freely.
+`the-room` / `film-section`. Both the snap and the button-driven scrolls resolve their
+resting position through the **same `targetYFor(el)` helper**, so they always land on the
+identical spot:
+
+- `the-room` (S3) **top-aligns** under the fixed nav (`-80` offset).
+- `film-section` (S4) is **centered** in the viewport (its id is in `CENTERED_IDS`) —
+  because its content is a single vertically-centered card, top-aligning would push the
+  card down and clip it. Centering rests it with the nav above and symmetric margins.
+
+Guards: it never fires during a `snapping` glide or a `programmaticScroll` (button-driven)
+scroll — this is what keeps "Watch the Film" and other buttons landing on-position. Only
+S3/S4 snap; the hero and pinned story scroll freely. To make a new centered section, add
+its id to `CENTERED_IDS`; otherwise it top-aligns with the `-80` offset.
 
 ## 5. Video (S4) contract (`VideoRevealSection`)
 
