@@ -58,13 +58,32 @@ export default function Home() {
     let snapping = false;
     let programmaticScroll = false;
 
+    // Nav clearance used when a section top-aligns under the fixed nav.
+    const NAV_OFFSET = 80;
+    // Sections whose content is a single vertically-centered card (S4 video):
+    // these snap so the card sits centered in the viewport (matching the design),
+    // instead of top-aligning under the nav — which would push the centered card
+    // down and clip it.
+    const CENTERED_IDS = new Set(["film-section"]);
+
+    // The exact resting scroll position for a section — the single source of truth
+    // shared by the buttons (programmatic scroll) and the settle-snap, so both
+    // always land on the same spot.
+    const targetYFor = (el: HTMLElement): number => {
+      const rect = el.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      if (CENTERED_IDS.has(el.id)) {
+        return Math.max(0, top + rect.height / 2 - window.innerHeight / 2);
+      }
+      return Math.max(0, top - NAV_OFFSET);
+    };
+
     setScrollToSection((id: string) => {
       const target = document.getElementById(id);
       if (!target) return;
       programmaticScroll = true;
       clearTimeout(settleTimer);
-      lenis.scrollTo(target, {
-        offset: -80,
+      lenis.scrollTo(targetYFor(target), {
         duration: 2.0,
         easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
         onComplete: () => {
@@ -91,11 +110,11 @@ export default function Home() {
     ScrollTrigger.refresh();
 
     // Snap the showroom (S3) and video (S4) into place once scrolling settles, using
-    // the SAME -80 offset the nav buttons use so the resting spot matches exactly (the
-    // "perfect position"). Only engages when already near one of them — the hero and
-    // pinned story scroll freely, and this always resettles to the correct spot.
+    // the SAME resting position the nav buttons use (via targetYFor) so the spot matches
+    // exactly (the "perfect position"): S3 top-aligns under the nav, S4 centers its card.
+    // Only engages when already near one of them — the hero and pinned story scroll
+    // freely, and this always resettles to the correct spot.
     const SNAP_IDS = ["the-room", "film-section"];
-    const NAV_OFFSET = 80;
     const considerSnap = () => {
       if (snapping || programmaticScroll) return;
       clearTimeout(settleTimer);
@@ -107,7 +126,7 @@ export default function Home() {
         for (const id of SNAP_IDS) {
           const el = document.getElementById(id);
           if (!el) continue;
-          const targetY = Math.max(0, el.getBoundingClientRect().top + window.scrollY - NAV_OFFSET);
+          const targetY = targetYFor(el);
           const dist = Math.abs(targetY - y);
           if (dist < bestDist) {
             bestDist = dist;
