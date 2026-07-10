@@ -240,3 +240,30 @@ This means an unoptimized image dropped in Drive is still served small automatic
 provide already-optimized files under the same names, that's the primary path and the WebP
 step just mirrors them. `sharp` install and each encode are best-effort: any failure is
 skipped and the original is served.
+
+## Video optimization (once, in CI — not per boot)
+
+Videos are heavy, so — unlike images — they are **not** transcoded at container start
+(that would add minutes to every deploy). Instead they're optimized **once in Drive** by a
+manually-run GitHub Action, **Optimize videos**
+(`.github/workflows/optimize-videos.yml` → `scripts/optimize-videos.mjs`, also
+`npm run videos:optimize`):
+
+1. Downloads each `.mp4` master listed in `assets.manifest.json` from Drive.
+2. Re-encodes to web-optimized H.264 — width capped at `MAX_WIDTH` (default 1920, never
+   upscales), `CRF` (default 24), AAC audio, and **`+faststart`** so playback can begin
+   before the file fully downloads.
+3. Uploads the smaller file back to the **same Drive file id** (in place), so
+   `assets.manifest.json` needs no change and Drive's **revision history keeps the original
+   master**. A file is only replaced when the re-encode is ≥5% smaller (`MIN_SAVING`).
+
+Run it from the Actions tab (**Optimize videos** → *Run workflow*) after dropping a new or
+updated video in Drive; tick **dry_run** first to see the size savings without writing. The
+deploy-time `assets:pull` then fetches the already-small files with **zero per-boot encoding
+cost**.
+
+> **Scope note:** writing back needs the OAuth token to carry a **writable** Drive scope
+> (`drive` or `drive.file`) — the same `GDRIVE_CLIENT_ID` / `GDRIVE_CLIENT_SECRET` /
+> `GDRIVE_REFRESH_TOKEN` used for pulling. A read-only token 403s on upload; the script
+> reports this clearly and leaves the master untouched (re-consent with a writable scope to
+> enable in-place replacement).

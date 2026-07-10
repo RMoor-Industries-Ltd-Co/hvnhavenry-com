@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "assets:pull": "node scripts/pull-assets.mjs"
+    "assets:pull": "node scripts/pull-assets.mjs",
+    "videos:optimize": "node scripts/optimize-videos.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
