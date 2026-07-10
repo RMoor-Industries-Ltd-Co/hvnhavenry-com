@@ -16,6 +16,7 @@ export function ProductInfoPanel({ product, onClose }: ProductInfoPanelProps) {
   const handleWatchFilm = () => {
     if (!product) return;
     openVideo(product.id);
+    onClose(); // close the card so the film lands cleanly
     scrollToSection?.("film-section");
   };
 

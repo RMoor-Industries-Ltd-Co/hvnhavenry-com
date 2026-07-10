@@ -52,13 +52,24 @@ export default function Home() {
     const rafId = requestAnimationFrame(raf);
     gsap.ticker.lagSmoothing(0);
 
+    // Shared scroll-state flags. The custom snap must never fight a button-driven
+    // (programmatic) scroll, or the user lands off-position (e.g. "Watch the Film").
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    let snapping = false;
+    let programmaticScroll = false;
+
     setScrollToSection((id: string) => {
       const target = document.getElementById(id);
       if (!target) return;
+      programmaticScroll = true;
+      clearTimeout(settleTimer);
       lenis.scrollTo(target, {
         offset: -80,
         duration: 2.0,
         easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+        onComplete: () => {
+          programmaticScroll = false;
+        },
       });
     });
 
@@ -85,10 +96,8 @@ export default function Home() {
     // pinned story scroll freely, and this always resettles to the correct spot.
     const SNAP_IDS = ["the-room", "film-section"];
     const NAV_OFFSET = 80;
-    let settleTimer: ReturnType<typeof setTimeout> | undefined;
-    let snapping = false;
     const considerSnap = () => {
-      if (snapping) return;
+      if (snapping || programmaticScroll) return;
       clearTimeout(settleTimer);
       settleTimer = setTimeout(() => {
         const y = window.scrollY;
