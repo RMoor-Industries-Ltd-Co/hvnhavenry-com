@@ -7,6 +7,7 @@ import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
 import { GoldenDivider } from "@/components/ui/GoldenDivider";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
+import { ConciergeReveal } from "@/components/ui/ConciergeReveal";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
@@ -38,6 +39,14 @@ export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
   const setScrollToSection = useHavenStore((s) => s.setScrollToSection);
   const setActiveNavSection = useHavenStore((s) => s.setActiveNavSection);
+  const scrollToSection = useHavenStore((s) => s.scrollToSection);
+  const summonConcierge = useHavenStore((s) => s.summonConcierge);
+
+  // "Speak to Concierge" (footer): glide the visitor to the showroom (S3), then —
+  // once that scroll lands — Vale flies in from the left to greet them.
+  const handleSpeakToConcierge = () => {
+    scrollToSection?.("the-room", summonConcierge);
+  };
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.4, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -78,7 +87,7 @@ export default function Home() {
       return Math.max(0, top - NAV_OFFSET);
     };
 
-    setScrollToSection((id: string) => {
+    setScrollToSection((id: string, onComplete?: () => void) => {
       const target = document.getElementById(id);
       if (!target) return;
       programmaticScroll = true;
@@ -88,6 +97,7 @@ export default function Home() {
         easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
         onComplete: () => {
           programmaticScroll = false;
+          onComplete?.();
         },
       });
     });
@@ -161,6 +171,7 @@ export default function Home() {
     <main>
       <NavBar />
       <ValeConcierge />
+      <ConciergeReveal />
 
       {/* Hero */}
       <section id="top" className="relative h-screen w-full overflow-hidden">
@@ -208,15 +219,26 @@ export default function Home() {
                 <p className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase font-sans opacity-60 mb-1">
                   {column}
                 </p>
-                {links.map((link) => (
-                  <a
-                    key={link}
-                    href="#"
-                    className="text-xs text-[#e8dcc8] opacity-50 hover:opacity-90 hover:text-[#c9a96e] transition-all duration-300 font-sans tracking-wide"
-                  >
-                    {link}
-                  </a>
-                ))}
+                {links.map((link) => {
+                  const isConcierge = link === "Speak to Concierge";
+                  return (
+                    <a
+                      key={link}
+                      href="#"
+                      onClick={
+                        isConcierge
+                          ? (e) => {
+                              e.preventDefault();
+                              handleSpeakToConcierge();
+                            }
+                          : undefined
+                      }
+                      className="text-xs text-[#e8dcc8] opacity-50 hover:opacity-90 hover:text-[#c9a96e] transition-all duration-300 font-sans tracking-wide"
+                    >
+                      {link}
+                    </a>
+                  );
+                })}
               </div>
             ))}
           </div>
