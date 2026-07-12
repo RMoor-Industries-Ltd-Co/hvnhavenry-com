@@ -96,7 +96,7 @@ Variant vocab by category (extend the list here before inventing a new word):
 | `promo` | `banner`, `social`, `concept` |
 | `video` | `poster`, `film` |
 | `mark` | `seal`, `splash`, `stamp` |
-| `character` | `stance`, `add-to-cart`, `cart-checkout`, `quiz-welcome` |
+| `character` | `stance`, `add-to-cart`, `cart-checkout`, `quiz-welcome`, `concierge` |
 
 **`mark` — brand seals** (new): recurring brand-identity visuals — a phrase, stamp, or
 seal meant to represent HVN generally and close out promotions, distinct from `promo`
@@ -123,6 +123,8 @@ tied to specific product touchpoints:
 - `add-to-cart` — confirms an item was added
 - `cart-checkout` — guides toward checkout
 - `quiz-welcome` — introduces a quiz/training flow
+- `concierge` — full-height greeting pose; flies in from the left of the screen when a
+  visitor picks "Speak to Concierge" and lands in the showroom (S3)
 
 Add new variants the same way as new poses come in — name them for the moment they
 serve, not a generic pose label.
@@ -188,7 +190,7 @@ not a source file, for anything under `public/assets/` or in the brand-slot list
 Never hand-commit a binary into one of those paths; add it to Drive and the manifest
 instead.
 
-**Exception, temporary:** the four `character__vale__*.png` files under
+**Exception, temporary:** the `character__vale__*.png` files under
 `public/assets/characters/vale/` are hand-committed as a deliberate one-time bridge —
 `GDRIVE_ASSETS_CREDENTIALS` doesn't exist yet, so the automated pull can't run, and these
 were needed live before that setup work was done. They're explicitly un-ignored in

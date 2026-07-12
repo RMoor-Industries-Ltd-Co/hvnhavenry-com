@@ -146,7 +146,7 @@ export function ScrollStory() {
               }`}
             >
               {beat.text.split(" ").map((word, w) => (
-                <span key={`${word}-${w}`} data-word className="inline-block mr-[0.28em]">
+                <span key={`${word}-${w}`} data-word className="inline-block mr-[0.28em] opacity-0">
                   {word}
                 </span>
               ))}
