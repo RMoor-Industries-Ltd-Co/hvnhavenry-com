@@ -116,6 +116,19 @@ export default function Home() {
         onLeaveBack: () => setActiveNavSection(leaveBack),
       });
     });
+    // S3 arrival — Vale, the concierge, flies in from the left the first time the
+    // showroom reaches view (no click needed). `once` keeps it a single greeting per
+    // visit; the footer "Speak to Concierge" link can re-summon her afterwards.
+    const roomEl = document.getElementById("the-room");
+    const conciergeTrigger = roomEl
+      ? ScrollTrigger.create({
+          trigger: roomEl,
+          start: "top 70%",
+          once: true,
+          onEnter: () => useHavenStore.getState().summonConcierge(),
+        })
+      : null;
+
     // Recompute positions after the pinned ScrollStory registers its own trigger.
     ScrollTrigger.refresh();
 
@@ -163,6 +176,7 @@ export default function Home() {
       clearTimeout(settleTimer);
       lenis.destroy();
       navTriggers.forEach((t) => t?.kill());
+      conciergeTrigger?.kill();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, [setScrollToSection, setActiveNavSection]);
