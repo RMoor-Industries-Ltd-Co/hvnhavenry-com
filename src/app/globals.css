@@ -173,3 +173,31 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .smoke-puff { animation: none; opacity: 0; }
 }
+
+/* Spirit-realm veil — a wide, slow, cool haze that the S2 manifesto words appear to
+   condense out of, as if summoned. Pure CSS (transform/opacity only); sits behind the
+   text and is faded in/out by the scroll timeline. Layered radial blooms in a cool
+   grey with faint gold + cream so it reads as smoke, not a flat wash. */
+@keyframes spirit-drift {
+  0%   { transform: translate3d(-2%, 3%, 0) scale(1.04); opacity: 0.55; }
+  50%  { transform: translate3d(2%, -3%, 0) scale(1.16); opacity: 1; }
+  100% { transform: translate3d(-2%, 3%, 0) scale(1.04); opacity: 0.55; }
+}
+.spirit-smoke {
+  background:
+    radial-gradient(38% 52% at 34% 56%, rgba(201, 169, 110, 0.10), rgba(201, 169, 110, 0) 70%),
+    radial-gradient(44% 58% at 63% 44%, rgba(210, 214, 224, 0.13), rgba(210, 214, 224, 0) 72%),
+    radial-gradient(56% 64% at 50% 60%, rgba(232, 220, 200, 0.08), rgba(232, 220, 200, 0) 75%);
+  filter: blur(28px);
+  animation: spirit-drift 15s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spirit-smoke { animation: none; }
+}
+
+/* Manifesto lines (S2) — a soft shadow so the text stays legible over any bright
+   region of the drifting background/smoke without needing a heavy full-screen scrim. */
+.manifesto-line {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 34px rgba(0, 0, 0, 0.55);
+}
