@@ -7,6 +7,24 @@ services:
       - "3000"
     env_file:
       - .env.local
+    depends_on:
+      - db
+    networks:
+      - havenry
+
+  # Backs Vale's interaction log + scheduled HVN<->AMG report cache (src/lib/db.ts).
+  # Nothing else on this site is stateful -- the marketing pages/assets pipeline never
+  # touch this database.
+  db:
+    image: postgres:16-alpine
+    container_name: hvnhavenry_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hvnhavenry
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-havenry_dev_only}
+      POSTGRES_DB: hvnhavenry
+    volumes:
+      - hvnhavenry_db_data:/var/lib/postgresql/data
     networks:
       - havenry
 
@@ -28,3 +46,6 @@ services:
 networks:
   havenry:
     driver: bridge
+
+volumes:
+  hvnhavenry_db_data:
