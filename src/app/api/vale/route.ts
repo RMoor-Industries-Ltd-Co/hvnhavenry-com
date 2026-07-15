@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateValeReply, isValePromptKey } from "@/lib/vale";
 import { PRODUCTS, type ProductId } from "@/lib/products";
+import { logValeInteraction } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -53,5 +54,9 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await generateValeReply(promptKey, productId);
+
+  // Best-effort: never let a logging hiccup break a visitor's reply.
+  logValeInteraction(promptKey, productId).catch(() => {});
+
   return NextResponse.json(result);
 }

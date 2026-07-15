@@ -21,4 +21,28 @@ backend-only executive-report agents elsewhere in PIAAR — this is the live, us
 half. Falls back to static on-brand copy (`FALLBACK_REPLIES` in `vale.ts`) whenever
 `ANTHROPIC_API_KEY` isn't configured, so the concierge widget is never broken for a
 visitor even before the AI is wired up.
+
+## Vale's HVN<->AMG backend channel (pull-ready for Cappo/ALLIE/ALLEN)
+
+Every `POST /api/vale` call best-effort logs `{promptKey, productId}` (never visitor
+identity — none is ever collected) to Postgres via `src/lib/db.ts`'s `logValeInteraction`.
+`src/lib/valeReportScheduler.ts`, started from `src/instrumentation.ts` at boot — same
+in-process hourly-check pattern as Cappo_Meridian's `cappoReportScheduler.ts` /
+connection-circle's `constanceReportScheduler.ts` (state in Postgres' `vale_reports`,
+survives restarts), regenerates every ≥6h. Aggregate-only, matching Constance's privacy
+pattern: counts by prompt type and top-asked-about products, never a raw interaction record.
+
+- **Pull the cached report**: `GET /api/agent/report` with header `x-agent-key:
+  $AGENT_API_KEY` — returns instantly, never triggers a live call. This is what Cappo
+  (AMG's operations AI, for HVN<->AMG business coordination) and ALLIE/ALLEN (via her
+  rollup) read instead of triggering live work just to check HVN showroom activity.
+- **Live delegation**: `POST /api/agent` with `{"task": "..."}`, same auth — for a
+  one-off question Cappo or ALLEN needs answered now. Distinct from `POST /api/vale`:
+  this route accepts a free-text task because the caller is a trusted, keyed internal
+  agent, not an anonymous visitor — the public concierge's no-free-text rule doesn't
+  apply here.
+- Both routes use `src/lib/agentAuth.ts`'s constant-time `isAgentAuthorized` from day
+  one (not retrofitted) — the same pattern used across every other PIAAR M2M endpoint.
+- `DATABASE_URL`/`AGENT_API_KEY` unset means logging/reporting silently no-op — the
+  public concierge itself keeps working either way.
 <!-- END:nextjs-agent-rules -->
