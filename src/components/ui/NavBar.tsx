@@ -1,10 +1,6 @@
 "use client";
 
 import { useHavenStore } from "@/lib/store";
-import { COLLECTION_ORDER } from "@/lib/products";
-
-// Shopify cart (the section-3 shopping CTA).
-const CART_URL = "https://hvnhavenry.com/cart";
 
 // Each section owns its own contextual center row, page-centered. As the active
 // section advances, earlier rows bump up and out while later rows rise into place.
@@ -18,9 +14,8 @@ function rowState(rowSection: number, active: number): string {
 export function NavBar() {
   const activeNavSection = useHavenStore((s) => s.activeNavSection);
   const scrollToSection = useHavenStore((s) => s.scrollToSection);
-  const activeCollection = useHavenStore((s) => s.activeCollection);
-  const setActiveCollection = useHavenStore((s) => s.setActiveCollection);
   const resetVideo = useHavenStore((s) => s.resetVideo);
+  const openCart = useHavenStore((s) => s.openCart);
 
   const go = (id: string) => () => scrollToSection?.(id);
 
@@ -65,29 +60,12 @@ export function NavBar() {
           </button>
         </div>
 
-        {/* S3 — the collection (functional; drives the room) */}
-        <div className={`${rowBase} flex flex-col items-center gap-2 ${rowState(2, activeNavSection)}`}>
+        {/* S3 — the collection links now live in-section (just above the room image),
+            so the nav only carries the ambient section label here. */}
+        <div className={`${rowBase} flex items-center justify-center ${rowState(2, activeNavSection)}`}>
           <span className="text-[0.65rem] tracking-[0.5em] uppercase text-[#c9a96e] opacity-50 font-sans">
-            The Collection
+            The Showroom
           </span>
-          <div className="flex items-center gap-6">
-            {COLLECTION_ORDER.map((collection) => (
-              <button
-                key={collection}
-                onClick={() => {
-                  setActiveCollection(collection);
-                  scrollToSection?.("the-room");
-                }}
-                className={`text-xs tracking-[0.25em] uppercase transition-opacity duration-300 font-sans cursor-pointer ${
-                  activeCollection === collection
-                    ? "text-[#c9a96e] opacity-100"
-                    : "text-[#e8dcc8] opacity-50 hover:opacity-90"
-                }`}
-              >
-                {collection}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* S4 (video) — the collection nav is pushed away; only a return control remains */}
@@ -111,12 +89,15 @@ export function NavBar() {
         }`}
       >
         {activeNavSection >= 2 ? (
-          <a
-            href={CART_URL}
+          <button
+            onClick={() => {
+              scrollToSection?.("the-room");
+              openCart();
+            }}
             className="text-xs tracking-[0.2em] uppercase text-[#c9a96e] opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-pointer font-sans whitespace-nowrap"
           >
             View Cart
-          </a>
+          </button>
         ) : (
           <button
             onClick={go("concierge")}

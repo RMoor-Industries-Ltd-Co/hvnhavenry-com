@@ -36,6 +36,17 @@ interface HavenStore {
   conciergeSummoned: boolean;
   summonConcierge: () => void;
   dismissConcierge: () => void;
+
+  // Cart — a set of product ids (each product appears once). "Acquire this room"
+  // adds every product offered on the active collection's page.
+  cart: ProductId[];
+  addToCart: (id: ProductId) => void;
+  addRoomToCart: (ids: ProductId[]) => void;
+  removeFromCart: (id: ProductId) => void;
+  clearCart: () => void;
+  cartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 export const useHavenStore = create<HavenStore>((set) => ({
@@ -62,4 +73,19 @@ export const useHavenStore = create<HavenStore>((set) => ({
   conciergeSummoned: false,
   summonConcierge: () => set({ conciergeSummoned: true }),
   dismissConcierge: () => set({ conciergeSummoned: false }),
+
+  cart: [],
+  addToCart: (id) =>
+    set((s) => (s.cart.includes(id) ? s : { cart: [...s.cart, id] })),
+  addRoomToCart: (ids) =>
+    set((s) => {
+      const merged = [...s.cart];
+      for (const id of ids) if (!merged.includes(id)) merged.push(id);
+      return { cart: merged };
+    }),
+  removeFromCart: (id) => set((s) => ({ cart: s.cart.filter((c) => c !== id) })),
+  clearCart: () => set({ cart: [] }),
+  cartOpen: false,
+  openCart: () => set({ cartOpen: true }),
+  closeCart: () => set({ cartOpen: false }),
 }));
