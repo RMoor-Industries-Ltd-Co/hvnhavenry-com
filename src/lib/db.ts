@@ -40,6 +40,20 @@ async function ensureSchema(p: Pool): Promise<void> {
           generated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
           error         TEXT
         );
+
+        -- Site-fault log -- ALLEN/ALLIE's window into "is anything broken on the site."
+        -- Populated by generateValeReply's own failure path (an AI call erroring means
+        -- something's actually wrong, not just an unconfigured key) and available for any
+        -- other part of the app to log into later (a client-side error boundary, a broken
+        -- asset pull, etc.) via logSiteFault.
+        CREATE TABLE IF NOT EXISTS site_faults (
+          id           BIGSERIAL PRIMARY KEY,
+          source       TEXT NOT NULL,
+          message      TEXT NOT NULL,
+          created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_site_faults_created_at
+          ON site_faults(created_at);
       `)
       .then(() => undefined)
       .catch((e) => {
@@ -60,6 +74,35 @@ export async function logValeInteraction(promptKey: string, productId?: string):
     promptKey,
     productId ?? null
   ]);
+}
+
+// Best-effort, same reasoning as logValeInteraction -- never let logging itself become
+// a second failure. Source identifies where the fault was observed (e.g. "vale_reply",
+// "vale_report", or a future client-side reporter).
+export async function logSiteFault(source: string, message: string): Promise<void> {
+  const p = getPool();
+  if (!p) return;
+  await ensureSchema(p);
+  await p.query(`INSERT INTO site_faults (source, message) VALUES ($1, $2)`, [source, message.slice(0, 2000)]);
+}
+
+export type SiteFaultSummary = { totalFaults: number; recent: { source: string; message: string; createdAt: string }[] };
+
+export async function getSiteFaultSummary(sinceHours: number): Promise<SiteFaultSummary> {
+  const p = getPool();
+  if (!p) return { totalFaults: 0, recent: [] };
+  await ensureSchema(p);
+  const since = `now() - interval '${Math.max(1, Math.floor(sinceHours))} hours'`;
+  const [total, recent] = await Promise.all([
+    p.query<{ count: string }>(`SELECT count(*) AS count FROM site_faults WHERE created_at >= ${since}`),
+    p.query<{ source: string; message: string; created_at: string }>(
+      `SELECT source, message, created_at::text FROM site_faults WHERE created_at >= ${since} ORDER BY created_at DESC LIMIT 10`
+    )
+  ]);
+  return {
+    totalFaults: Number(total.rows[0]?.count ?? 0),
+    recent: recent.rows.map((r) => ({ source: r.source, message: r.message, createdAt: r.created_at }))
+  };
 }
 
 export type InteractionCounts = { promptKey: string; count: number }[];
