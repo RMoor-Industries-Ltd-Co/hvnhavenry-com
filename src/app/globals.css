@@ -10,12 +10,20 @@
   --color-haven-velvet: #1a1035;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Tailwind v4 emits its utilities inside CSS @layer blocks (via @import "tailwindcss"
+   above), and unlayered rules ALWAYS beat layered ones regardless of specificity. An
+   unlayered reset here silently nulls out every Tailwind margin/padding utility site-wide
+   -- this was the actual cause of S2's word-spacing bug (mr-[0.28em] is the only thing
+   putting space between the per-word spans; the reset was zeroing it back out). Wrapping
+   the reset in @layer base lets Tailwind's own utilities layer win again, as intended. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html {
