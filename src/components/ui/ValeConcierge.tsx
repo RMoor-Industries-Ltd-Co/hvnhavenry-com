@@ -46,20 +46,11 @@ function ConciergePanel({
   const activeProduct = activeTabItem ? PRODUCTS[activeTabItem] : null;
 
   return (
-    <div className="relative flex items-end gap-3 bg-[#0d0b09]/95 backdrop-blur-md border border-[#c9a96e]/30 px-5 py-4 w-96">
-      <div className="relative w-16 h-24 shrink-0 overflow-hidden">
-        <Image
-          src="/assets/characters/vale/character__vale__concierge.png"
-          alt="Vale, the HVN Havenry concierge"
-          fill
-          className="object-cover object-top"
-          sizes="64px"
-        />
-      </div>
-      <div className="relative flex-1">
+    <div className="relative flex items-end gap-4 bg-[#0d0b09]/95 backdrop-blur-md border border-[#c9a96e]/30 px-5 py-4">
+      <div className="relative w-72 shrink-0">
         <button
           onClick={onClose}
-          className="absolute -top-1 -right-1 text-[#c9a96e] opacity-50 hover:opacity-100 transition-opacity text-xs cursor-pointer"
+          className="absolute -top-1 -right-1 z-10 text-[#c9a96e] opacity-50 hover:opacity-100 transition-opacity text-xs cursor-pointer"
           aria-label="Close"
         >
           ✕
@@ -90,6 +81,17 @@ function ConciergePanel({
             </button>
           ))}
         </div>
+      </div>
+      {/* Right-side portrait -- at least 75% of the viewport height, per spec. */}
+      <div className="relative h-[75vh] w-[min(32vw,320px)] shrink-0 overflow-hidden">
+        <Image
+          src="/assets/characters/vale/character__vale__concierge.png"
+          alt="Vale, the HVN Havenry concierge"
+          fill
+          className="object-cover object-top"
+          sizes="320px"
+          priority
+        />
       </div>
     </div>
   );
