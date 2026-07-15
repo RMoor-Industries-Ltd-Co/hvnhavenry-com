@@ -32,13 +32,13 @@ export function ConciergeReveal() {
           : "-translate-x-full opacity-0 pointer-events-none"
       }`}
     >
-      <div className="relative w-[200px] h-[380px] sm:w-[280px] sm:h-[540px]">
+      <div className="relative h-[50vh] w-[50vh]">
         <Image
           src="/assets/characters/vale/character__vale__concierge.png"
           alt="Vale, the HVN Havenry concierge, arriving to assist"
           fill
           priority
-          sizes="(max-width: 640px) 200px, 280px"
+          sizes="50vh"
           className="object-contain object-bottom select-none pointer-events-none"
         />
       </div>
