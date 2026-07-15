@@ -1,23 +1,52 @@
 "use client";
 
 import { useHavenStore } from "@/lib/store";
-import { getProductsByCollection, PRODUCTS } from "@/lib/products";
+import { COLLECTION_ORDER, getProductsByCollection, PRODUCTS } from "@/lib/products";
+import { GoldenDivider } from "@/components/ui/GoldenDivider";
 import { ProductInfoPanel } from "./ProductInfoPanel";
+import { CartPanel } from "./CartPanel";
 
 export function RoomTabs() {
   const activeCollection = useHavenStore((s) => s.activeCollection);
+  const setActiveCollection = useHavenStore((s) => s.setActiveCollection);
   const activeTabItem = useHavenStore((s) => s.activeTabItem);
   const setActiveTabItem = useHavenStore((s) => s.setActiveTabItem);
 
   const items = getProductsByCollection(activeCollection);
 
   return (
-    <section id="the-room" className="relative w-full bg-[#0d0b09] pt-24">
-      {/* Collection nav lives in the fixed top NavBar (section-3 row) — no duplicate
-          header here. Section top padding keeps the room clear of the pinned nav. */}
+    // The whole section is bounded by its own top + bottom dividers, sized so both
+    // dividers, the collection links, and the room image sit together in one viewport
+    // when the section snaps into place.
+    <section id="the-room" className="relative w-full bg-[#0d0b09] flex flex-col">
+      {/* Top divider — opens the section. */}
+      <GoldenDivider py="py-6" />
+
+      {/* Collection links — just above the image, the functional controls that drive
+          which room is shown. */}
+      <div className="flex flex-col items-center gap-2 pb-4">
+        <span className="text-[0.65rem] tracking-[0.5em] uppercase text-[#c9a96e] opacity-50 font-sans">
+          The Collection
+        </span>
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4">
+          {COLLECTION_ORDER.map((collection) => (
+            <button
+              key={collection}
+              onClick={() => setActiveCollection(collection)}
+              className={`text-xs tracking-[0.25em] uppercase transition-opacity duration-300 font-sans cursor-pointer ${
+                activeCollection === collection
+                  ? "text-[#c9a96e] opacity-100"
+                  : "text-[#e8dcc8] opacity-50 hover:opacity-90"
+              }`}
+            >
+              {collection}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Room stage */}
-      <div className="relative h-[85vh] w-full overflow-hidden">
+      <div className="relative h-[60vh] w-full overflow-hidden">
         {/* Showroom background (placeholder: hero__great-room__day) — WebP w/ PNG fallback. */}
         <div className="absolute inset-0 bg-cover bg-center bg-asset-room-day" />
 
@@ -50,7 +79,14 @@ export function RoomTabs() {
           product={activeTabItem ? PRODUCTS[activeTabItem] : null}
           onClose={() => setActiveTabItem(null)}
         />
+
+        {/* Cart drawer — same size/position/close as the product panel, flies in from
+            the right. */}
+        <CartPanel />
       </div>
+
+      {/* Bottom divider — closes the section. */}
+      <GoldenDivider py="py-6" />
     </section>
   );
 }

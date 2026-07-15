@@ -200,14 +200,11 @@ export default function Home() {
         <ScrollStory />
       </div>
 
-      <GoldenDivider />
-
-      {/* Section 3: Interactive room tabs — the concierge / shopping destination */}
+      {/* Section 3: Interactive room tabs — the concierge / shopping destination.
+          RoomTabs carries its own top + bottom dividers so they bound the section. */}
       <div id="concierge">
         <RoomTabs />
       </div>
-
-      <GoldenDivider />
 
       {/* Section 4: Video reveal (return is via the nav's "Return to Showroom") */}
       <VideoRevealSection />
