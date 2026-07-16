@@ -18,7 +18,10 @@ export function RoomTabs() {
     // The whole section is bounded by its own top + bottom dividers, sized so both
     // dividers, the collection links, and the room image sit together in one viewport
     // when the section snaps into place.
-    <section id="the-room" className="relative w-full bg-[#0d0b09] flex flex-col">
+    <section
+      id="the-room"
+      className="relative w-full bg-[#0d0b09] flex flex-col min-h-[calc(100vh-5rem)]"
+    >
       {/* Top divider — opens the section. */}
       <GoldenDivider py="py-6" />
 
@@ -45,8 +48,10 @@ export function RoomTabs() {
         </div>
       </div>
 
-      {/* Room stage */}
-      <div className="relative h-[60vh] w-full overflow-hidden">
+      {/* Room stage — flexes to fill all space between the links and the bottom
+          divider, so the showroom uses the full viewport height on every device
+          (with a floor so it never collapses on very short landscape phones). */}
+      <div className="relative flex-1 min-h-[45vh] w-full overflow-hidden">
         {/* Showroom background (placeholder: hero__great-room__day) — WebP w/ PNG fallback. */}
         <div className="absolute inset-0 bg-cover bg-center bg-asset-room-day" />
 
