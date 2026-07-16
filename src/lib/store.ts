@@ -37,6 +37,19 @@ interface HavenStore {
   summonConcierge: () => void;
   dismissConcierge: () => void;
 
+  // Full-screen loader shown only when the visitor is *sent* to the showroom via the
+  // "View Showroom" action (not on manual scroll). Covers the S2 parallax, then fades.
+  loaderActive: boolean;
+  showLoader: () => void;
+  hideLoader: () => void;
+  // Sends the visitor to the showroom (S3) behind the loader, hiding it once arrived.
+  viewShowroom: () => void;
+
+  // True while the footer is in view — used to stop the concierge launcher from
+  // floating over the footer section.
+  inFooter: boolean;
+  setInFooter: (inFooter: boolean) => void;
+
   // Cart — a set of product ids (each product appears once). "Acquire this room"
   // adds every product offered on the active collection's page.
   cart: ProductId[];
@@ -49,7 +62,7 @@ interface HavenStore {
   closeCart: () => void;
 }
 
-export const useHavenStore = create<HavenStore>((set) => ({
+export const useHavenStore = create<HavenStore>((set, get) => ({
   activeCollection: COLLECTION_ORDER[0],
   setActiveCollection: (collection) =>
     set({ activeCollection: collection, activeTabItem: null }),
@@ -73,6 +86,22 @@ export const useHavenStore = create<HavenStore>((set) => ({
   conciergeSummoned: false,
   summonConcierge: () => set({ conciergeSummoned: true }),
   dismissConcierge: () => set({ conciergeSummoned: false }),
+
+  loaderActive: false,
+  showLoader: () => set({ loaderActive: true }),
+  hideLoader: () => set({ loaderActive: false }),
+  viewShowroom: () => {
+    const { scrollToSection } = get();
+    set({ loaderActive: true });
+    if (scrollToSection) {
+      scrollToSection("the-room", () => set({ loaderActive: false }));
+    } else {
+      set({ loaderActive: false });
+    }
+  },
+
+  inFooter: false,
+  setInFooter: (inFooter) => set({ inFooter }),
 
   cart: [],
   addToCart: (id) =>

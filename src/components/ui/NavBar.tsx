@@ -16,6 +16,7 @@ export function NavBar() {
   const scrollToSection = useHavenStore((s) => s.scrollToSection);
   const resetVideo = useHavenStore((s) => s.resetVideo);
   const openCart = useHavenStore((s) => s.openCart);
+  const viewShowroom = useHavenStore((s) => s.viewShowroom);
 
   const go = (id: string) => () => scrollToSection?.(id);
 
@@ -55,8 +56,8 @@ export function NavBar() {
           <button onClick={go("top")} className={linkClass}>
             Back to Home
           </button>
-          <button onClick={go("concierge")} className={linkClass}>
-            Speak to Concierge
+          <button onClick={go("the-room")} className={linkClass}>
+            View Showroom
           </button>
         </div>
 
@@ -100,10 +101,10 @@ export function NavBar() {
           </button>
         ) : (
           <button
-            onClick={go("concierge")}
+            onClick={viewShowroom}
             className="text-xs tracking-[0.2em] uppercase text-[#c9a96e] opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-pointer font-sans whitespace-nowrap"
           >
-            Speak to Concierge
+            View Showroom
           </button>
         )}
       </div>
