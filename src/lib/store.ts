@@ -42,7 +42,10 @@ interface HavenStore {
   loaderActive: boolean;
   showLoader: () => void;
   hideLoader: () => void;
-  // Sends the visitor to the showroom (S3) behind the loader, hiding it once arrived.
+  // Scroll to any section behind the loader, hiding it once arrived. Use this for every
+  // button-driven jump so the loader covers the parallax during the move.
+  navigate: (id: string) => void;
+  // Convenience: navigate to the showroom (S3) behind the loader.
   viewShowroom: () => void;
 
   // True while the footer is in view — used to stop the concierge launcher from
@@ -90,15 +93,16 @@ export const useHavenStore = create<HavenStore>((set, get) => ({
   loaderActive: false,
   showLoader: () => set({ loaderActive: true }),
   hideLoader: () => set({ loaderActive: false }),
-  viewShowroom: () => {
+  navigate: (id) => {
     const { scrollToSection } = get();
     set({ loaderActive: true });
     if (scrollToSection) {
-      scrollToSection("the-room", () => set({ loaderActive: false }));
+      scrollToSection(id, () => set({ loaderActive: false }));
     } else {
       set({ loaderActive: false });
     }
   },
+  viewShowroom: () => get().navigate("the-room"),
 
   inFooter: false,
   setInFooter: (inFooter) => set({ inFooter }),
