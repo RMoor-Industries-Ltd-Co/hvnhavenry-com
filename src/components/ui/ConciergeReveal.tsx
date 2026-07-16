@@ -4,22 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useHavenStore } from "@/lib/store";
 import { getProductsByCollection } from "@/lib/products";
-import type { ValePromptKey } from "@/lib/vale";
 
 // Vale — the HVN Havenry concierge. Summoned from the persistent lower-left launcher
 // (present on every section, hidden only in the footer), he flies in from the left at
 // half the viewport height with a golden aura, and hosts a dialogue box near his hand.
 // He stays for a 15-second window (a countdown shows by his knee); touching him resets
-// it, and at 0 he flies back out to the left.
-//
-// The dialogue copy + options change per section (S1/S2/S3/S4). The one button that
-// talks to Vale ("Speak to Concierge", S3) sends only a fixed promptKey to /api/vale —
-// no free-text input, preserving the public concierge's safety model (see AGENTS.md).
-type ValeReply = { text: string; productLink?: string };
+// it, and at 0 he flies back out to the left. The dialogue copy + options change per
+// section (S1/S2/S3/S4).
 type MenuItem = { label: string; onClick: () => void };
 
 const VISIBLE_SECONDS = 15;
 const ACCOUNT_URL = "https://hvnhavenry.com/account";
+const MANAGEMENT_MAILTO = "mailto:management@hvnhavenry.com";
 
 export function ConciergeReveal() {
   const summoned = useHavenStore((s) => s.conciergeSummoned);
@@ -27,36 +23,20 @@ export function ConciergeReveal() {
   const dismiss = useHavenStore((s) => s.dismissConcierge);
   const inFooter = useHavenStore((s) => s.inFooter);
   const activeNavSection = useHavenStore((s) => s.activeNavSection);
-  const scrollToSection = useHavenStore((s) => s.scrollToSection);
+  const navigate = useHavenStore((s) => s.navigate);
   const viewShowroom = useHavenStore((s) => s.viewShowroom);
   const openCart = useHavenStore((s) => s.openCart);
   const addRoomToCart = useHavenStore((s) => s.addRoomToCart);
   const activeCollection = useHavenStore((s) => s.activeCollection);
 
-  const [reply, setReply] = useState<ValeReply | null>(null);
-  const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(VISIBLE_SECONDS);
   const deadlineRef = useRef(0);
-
-  // Talk to Vale for a fixed prompt key (S3 only). No free-text ever reaches the model.
-  function ask(key: ValePromptKey) {
-    setLoading(true);
-    setReply(null);
-    fetch("/api/vale", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ promptKey: key }),
-    })
-      .then((res) => res.json().then((data) => (res.ok ? data : { text: "Vale will be with you shortly." })))
-      .catch(() => ({ text: "Vale will be with you shortly." }))
-      .then(setReply)
-      .finally(() => setLoading(false));
-  }
 
   function acquireRoom() {
     addRoomToCart(getProductsByCollection(activeCollection).map((p) => p.id));
     openCart();
   }
+  const openLink = (href: string) => () => window.open(href, "_blank", "noopener");
 
   // Per-section copy + options. 0 = S1 (hero), 1 = S2 (story), 2 = S3 (showroom),
   // 3 = S4 (video).
@@ -65,30 +45,30 @@ export function ConciergeReveal() {
       body: "Welcome to the HVN Havenry. I am here to assist you through your visit. Please choose an option below.",
       menu: [
         { label: "View Showroom", onClick: viewShowroom },
-        { label: "View Past Order", onClick: () => window.open(ACCOUNT_URL, "_blank", "noopener") },
+        { label: "View Past Order", onClick: openLink(ACCOUNT_URL) },
       ],
     },
     1: {
       body: "Please continue to scroll to learn about the havenry.",
-      menu: [{ label: "Learn More", onClick: () => scrollToSection?.("the-room") }],
+      menu: [{ label: "Learn More", onClick: () => navigate("the-room") }],
     },
     2: {
       body: "Welcome to the HVN Havenry showroom.",
       menu: [
-        { label: "Speak to Concierge", onClick: () => ask("speak_to_concierge") },
+        { label: "View a previous order", onClick: openLink(ACCOUNT_URL) },
         { label: "View Cart", onClick: openCart },
         { label: "Acquire this room", onClick: acquireRoom },
       ],
     },
     3: {
       body: "To learn more about our offerings:",
-      menu: [{ label: "Visit the Showroom", onClick: () => scrollToSection?.("the-room") }],
+      menu: [
+        { label: "Visit the Showroom", onClick: () => navigate("the-room") },
+        { label: "Speak to Management", onClick: openLink(MANAGEMENT_MAILTO) },
+      ],
     },
   };
   const section = SECTION[activeNavSection] ?? SECTION[0];
-  // Vale's replies only come from the S3 "Speak to Concierge" action; elsewhere show the
-  // section's copy.
-  const bodyText = loading ? "…" : activeNavSection === 2 && reply ? reply.text : section.body;
 
   const resetTimer = () => {
     deadlineRef.current = Date.now() + VISIBLE_SECONDS * 1000;
@@ -156,27 +136,15 @@ export function ConciergeReveal() {
 
             <p className="font-display text-lg text-[#c9a96e] mb-2">Vale</p>
             <p className="text-xs text-[#e8dcc8] opacity-80 font-sans leading-relaxed min-h-[2.5rem]">
-              {bodyText}
+              {section.body}
             </p>
-
-            {activeNavSection === 2 && reply?.productLink && (
-              <a
-                href={reply.productLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 text-[10px] uppercase tracking-wider text-[#c9a96e] underline underline-offset-2"
-              >
-                Continue to checkout
-              </a>
-            )}
 
             <div className="mt-3 flex flex-col gap-1.5">
               {section.menu.map(({ label, onClick }) => (
                 <button
                   key={label}
                   onClick={onClick}
-                  disabled={loading}
-                  className="text-left text-[11px] uppercase tracking-wider text-[#e8dcc8] opacity-70 hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-default disabled:opacity-30"
+                  className="text-left text-[11px] uppercase tracking-wider text-[#e8dcc8] opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   {label}
                 </button>

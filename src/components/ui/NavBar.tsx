@@ -17,8 +17,11 @@ export function NavBar() {
   const resetVideo = useHavenStore((s) => s.resetVideo);
   const openCart = useHavenStore((s) => s.openCart);
   const viewShowroom = useHavenStore((s) => s.viewShowroom);
+  const navigate = useHavenStore((s) => s.navigate);
 
-  const go = (id: string) => () => scrollToSection?.(id);
+  // Loader-backed jump — covers the parallax during the move (used for every
+  // section-to-section navigation, e.g. the HVN logo shooting back up to S1).
+  const goLoader = (id: string) => () => navigate(id);
 
   const linkClass =
     "text-xs tracking-[0.25em] uppercase text-[#e8dcc8] opacity-60 hover:opacity-100 transition-opacity duration-300 font-sans cursor-pointer";
@@ -33,7 +36,7 @@ export function NavBar() {
     <nav className="fixed top-0 inset-x-0 z-40 h-16 mix-blend-normal">
       {/* Logo — hidden in S2, returns in S3. Padded off the top-left edge. */}
       <button
-        onClick={go("top")}
+        onClick={goLoader("top")}
         className={`absolute top-0 left-0 ${edge} font-display text-2xl tracking-[0.3em] text-[#c9a96e] cursor-pointer hover:opacity-80 transition-all duration-500 ${
           flanksHidden ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
@@ -53,10 +56,10 @@ export function NavBar() {
 
         {/* S2 — page controls */}
         <div className={`${rowBase} flex items-center justify-center gap-8 ${rowState(1, activeNavSection)}`}>
-          <button onClick={go("top")} className={linkClass}>
+          <button onClick={goLoader("top")} className={linkClass}>
             Back to Home
           </button>
-          <button onClick={go("the-room")} className={linkClass}>
+          <button onClick={goLoader("the-room")} className={linkClass}>
             View Showroom
           </button>
         </div>
@@ -74,7 +77,7 @@ export function NavBar() {
           <button
             onClick={() => {
               resetVideo();
-              scrollToSection?.("the-room");
+              navigate("the-room");
             }}
             className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] opacity-80 hover:opacity-100 transition-opacity duration-300 font-sans cursor-pointer"
           >
