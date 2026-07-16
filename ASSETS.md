@@ -95,7 +95,7 @@ Variant vocab by category (extend the list here before inventing a new word):
 | `product` | `hero`, `detail`, `lifestyle` |
 | `promo` | `banner`, `social`, `concept` |
 | `video` | `poster`, `film` |
-| `mark` | `seal`, `splash`, `stamp` |
+| `mark` | `seal`, `splash`, `stamp`, `loading` |
 | `character` | `stance`, `add-to-cart`, `cart-checkout`, `quiz-welcome`, `concierge` |
 
 **`mark` — brand seals** (new): recurring brand-identity visuals — a phrase, stamp, or

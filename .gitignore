@@ -55,6 +55,8 @@ next-env.d.ts
 !/public/assets/characters/vale/character__vale__cart-checkout.png
 !/public/assets/characters/vale/character__vale__quiz-welcome.png
 !/public/assets/characters/vale/character__vale__concierge.png
+!/public/assets/mark/
+!/public/assets/mark/mark__aure__loading.mp4
 
 /public/favicon.svg
 /public/favicon-512.png

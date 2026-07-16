@@ -6,35 +6,39 @@ import { useHavenStore } from "@/lib/store";
 import { getProductsByCollection } from "@/lib/products";
 import type { ValePromptKey } from "@/lib/vale";
 
-// Vale — the HVN Havenry concierge. He flies in from the left at half the viewport
-// height, greets, and hosts a dialogue box near his outstretched hand. He stays for a
-// 15-second window (a countdown shows by his knee); touching him resets that window.
-// When it reaches 0 he flies back out to the left.
+// Vale — the HVN Havenry concierge. Summoned from the persistent lower-left launcher
+// (present on every section, hidden only in the footer), he flies in from the left at
+// half the viewport height with a golden aura, and hosts a dialogue box near his hand.
+// He stays for a 15-second window (a countdown shows by his knee); touching him resets
+// it, and at 0 he flies back out to the left.
 //
-// The dialogue box carries copy only. The one button that talks to Vale ("Speak to
-// Concierge") sends only a fixed promptKey to /api/vale — no free-text input, preserving
-// the public concierge's safety model (see AGENTS.md).
+// The dialogue copy + options change per section (S1/S2/S3/S4). The one button that
+// talks to Vale ("Speak to Concierge", S3) sends only a fixed promptKey to /api/vale —
+// no free-text input, preserving the public concierge's safety model (see AGENTS.md).
 type ValeReply = { text: string; productLink?: string };
+type MenuItem = { label: string; onClick: () => void };
 
 const VISIBLE_SECONDS = 15;
-const WELCOME =
-  "Welcome to HVN Havenry. I'm Vale — take your time in the showroom, and call on me whenever you'd like a hand.";
+const ACCOUNT_URL = "https://hvnhavenry.com/account";
 
 export function ConciergeReveal() {
   const summoned = useHavenStore((s) => s.conciergeSummoned);
   const summon = useHavenStore((s) => s.summonConcierge);
   const dismiss = useHavenStore((s) => s.dismissConcierge);
-  const activeCollection = useHavenStore((s) => s.activeCollection);
-  const addRoomToCart = useHavenStore((s) => s.addRoomToCart);
+  const inFooter = useHavenStore((s) => s.inFooter);
+  const activeNavSection = useHavenStore((s) => s.activeNavSection);
+  const scrollToSection = useHavenStore((s) => s.scrollToSection);
+  const viewShowroom = useHavenStore((s) => s.viewShowroom);
   const openCart = useHavenStore((s) => s.openCart);
+  const addRoomToCart = useHavenStore((s) => s.addRoomToCart);
+  const activeCollection = useHavenStore((s) => s.activeCollection);
 
   const [reply, setReply] = useState<ValeReply | null>(null);
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(VISIBLE_SECONDS);
   const deadlineRef = useRef(0);
 
-  // Talk to Vale for a fixed prompt key (button clicks only). No free-text ever reaches
-  // the model.
+  // Talk to Vale for a fixed prompt key (S3 only). No free-text ever reaches the model.
   function ask(key: ValePromptKey) {
     setLoading(true);
     setReply(null);
@@ -49,14 +53,43 @@ export function ConciergeReveal() {
       .finally(() => setLoading(false));
   }
 
-  // "Acquire this room" — place every product on the active collection's page into the
-  // cart, then open the cart.
   function acquireRoom() {
     addRoomToCart(getProductsByCollection(activeCollection).map((p) => p.id));
     openCart();
   }
 
-  // Touching Vale (or interacting with his panel) pushes the deadline back out.
+  // Per-section copy + options. 0 = S1 (hero), 1 = S2 (story), 2 = S3 (showroom),
+  // 3 = S4 (video).
+  const SECTION: Record<number, { body: string; menu: MenuItem[] }> = {
+    0: {
+      body: "Welcome to the HVN Havenry. I am here to assist you through your visit. Please choose an option below.",
+      menu: [
+        { label: "View Showroom", onClick: viewShowroom },
+        { label: "View Past Order", onClick: () => window.open(ACCOUNT_URL, "_blank", "noopener") },
+      ],
+    },
+    1: {
+      body: "Please continue to scroll to learn about the havenry.",
+      menu: [{ label: "Learn More", onClick: () => scrollToSection?.("the-room") }],
+    },
+    2: {
+      body: "Welcome to the HVN Havenry showroom.",
+      menu: [
+        { label: "Speak to Concierge", onClick: () => ask("speak_to_concierge") },
+        { label: "View Cart", onClick: openCart },
+        { label: "Acquire this room", onClick: acquireRoom },
+      ],
+    },
+    3: {
+      body: "To learn more about our offerings:",
+      menu: [{ label: "Visit the Showroom", onClick: () => scrollToSection?.("the-room") }],
+    },
+  };
+  const section = SECTION[activeNavSection] ?? SECTION[0];
+  // Vale's replies only come from the S3 "Speak to Concierge" action; elsewhere show the
+  // section's copy.
+  const bodyText = loading ? "…" : activeNavSection === 2 && reply ? reply.text : section.body;
+
   const resetTimer = () => {
     deadlineRef.current = Date.now() + VISIBLE_SECONDS * 1000;
   };
@@ -76,17 +109,11 @@ export function ConciergeReveal() {
     return () => clearInterval(iv);
   }, [summoned, dismiss]);
 
-  const menu: { label: string; onClick: () => void }[] = [
-    { label: "Speak to Concierge", onClick: () => ask("speak_to_concierge") },
-    { label: "View Cart", onClick: openCart },
-    { label: "Acquire this room", onClick: acquireRoom },
-  ];
-
   return (
     <>
-      {/* Persistent lower-left launcher — present whenever Vale is not on screen, hidden
-          the moment he appears. */}
-      {!summoned && (
+      {/* Persistent lower-left launcher — present on every section whenever Vale is off
+          screen, hidden the moment he appears and while the footer is in view. */}
+      {!summoned && !inFooter && (
         <button
           onClick={summon}
           className="fixed bottom-8 left-8 z-[55] bg-[#0d0b09]/95 backdrop-blur-md border border-[#c9a96e]/30 px-4 py-2 text-[10px] uppercase tracking-wider text-[#c9a96e] hover:bg-[#0d0b09] transition-colors cursor-pointer"
@@ -102,7 +129,6 @@ export function ConciergeReveal() {
           summoned ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
         }`}
       >
-        {/* Vale — half the viewport height, golden aura tracing his silhouette. */}
         <div className="relative h-[50vh] w-[50vh]">
           <Image
             src="/assets/characters/vale/character__vale__concierge.png"
@@ -118,7 +144,7 @@ export function ConciergeReveal() {
             {seconds}
           </span>
 
-          {/* Dialogue box — copy only, its top-left corner near his outstretched hand. */}
+          {/* Dialogue box — copy only, near his outstretched hand. */}
           <div className="absolute left-[55%] top-[45%] w-72 max-w-[72vw] bg-[#0d0b09]/95 backdrop-blur-md border border-[#c9a96e]/30 px-5 py-4">
             <button
               onClick={dismiss}
@@ -130,10 +156,10 @@ export function ConciergeReveal() {
 
             <p className="font-display text-lg text-[#c9a96e] mb-2">Vale</p>
             <p className="text-xs text-[#e8dcc8] opacity-80 font-sans leading-relaxed min-h-[2.5rem]">
-              {loading ? "…" : reply?.text ?? WELCOME}
+              {bodyText}
             </p>
 
-            {reply?.productLink && (
+            {activeNavSection === 2 && reply?.productLink && (
               <a
                 href={reply.productLink}
                 target="_blank"
@@ -145,7 +171,7 @@ export function ConciergeReveal() {
             )}
 
             <div className="mt-3 flex flex-col gap-1.5">
-              {menu.map(({ label, onClick }) => (
+              {section.menu.map(({ label, onClick }) => (
                 <button
                   key={label}
                   onClick={onClick}

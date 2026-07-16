@@ -3,16 +3,15 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import { SmokeStream } from "./SmokeStream";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// The Atmospheric Jurisdiction manifesto — delivered beat by beat. Each beat's
-// words condense out of a rising spirit-realm smoke (heavy blur + upward drift that
-// resolves as they settle), hold long enough to read, then release upward as the next
-// beat gathers. The closing beat is the philosophy itself, landing in gold.
+// The Atmospheric Jurisdiction manifesto — delivered beat by beat over the brand
+// background. Each beat's words gather from a soft blur + slight upward drift, hold long
+// enough to read, then release upward as the next beat gathers. The closing beat is the
+// philosophy itself, landing in gold.
 interface Beat {
   text: string;
   final?: boolean;
@@ -34,7 +33,6 @@ export function ScrollStory() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const beatRefs = useRef<(HTMLDivElement | null)[]>([]);
   const bgRef = useRef<HTMLDivElement>(null);
-  const smokeRef = useRef<HTMLDivElement>(null);
   const continueRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,16 +63,6 @@ export function ScrollStory() {
           bgRef.current,
           { opacity: 0, yPercent: -6, scale: 1.08 },
           { opacity: 0.72, yPercent: 6, scale: 1, ease: "none" },
-          0
-        );
-      }
-
-      // Spirit-realm smoke swells in beneath the words and lingers through the beats.
-      if (smokeRef.current) {
-        tl.fromTo(
-          smokeRef.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", duration: 1.4 },
           0
         );
       }
@@ -126,12 +114,9 @@ export function ScrollStory() {
         }
       });
 
-      // Fade the background — and the smoke — away beneath the final statement.
+      // Fade the background away beneath the final statement.
       if (bgRef.current) {
         tl.to(bgRef.current, { opacity: 0, duration: 0.8, ease: "power1.in" }, ">-0.4");
-      }
-      if (smokeRef.current) {
-        tl.to(smokeRef.current, { opacity: 0, duration: 0.8, ease: "power1.in" }, "<");
       }
 
       if (continueRef.current) {
@@ -158,16 +143,6 @@ export function ScrollStory() {
       <div className="absolute inset-0 bg-[#0d0b09]/45 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(60%_50%_at_50%_50%,rgba(13,11,9,0.55),transparent_75%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0d0b09]/70 via-transparent to-[#0d0b09]/80 pointer-events-none" />
-
-      {/* Spirit-realm smoke the words condense out of — a wide drifting veil across the
-          text band, with two rising wisps flanking center. Timeline fades the veil in/out. */}
-      <div
-        ref={smokeRef}
-        aria-hidden="true"
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[62vh] pointer-events-none opacity-0 spirit-smoke"
-      />
-      <SmokeStream className="absolute left-[38%] bottom-[18%] h-[60vh] w-32 opacity-60" />
-      <SmokeStream className="absolute left-[62%] bottom-[16%] h-[60vh] w-32 opacity-60" />
 
       <div className="relative w-full max-w-3xl px-8 text-center">
         {BEATS.map((beat, i) => (
