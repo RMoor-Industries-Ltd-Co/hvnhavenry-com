@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { PRODUCTS, type ProductId } from "./products";
-import { getInteractionSummary } from "./db";
+import { getInteractionSummary, getSiteFaultSummary, logSiteFault } from "./db";
 
 /**
  * Vale -- HVN Havenry's public-facing concierge. Publicly reachable, no login, so the
@@ -103,8 +103,11 @@ export async function generateValeReply(promptKey: ValePromptKey, productId?: Pr
       .trim();
 
     return { text: text || FALLBACK_REPLIES[promptKey], ...(productLink ? { productLink } : {}) };
-  } catch {
-    // Same reasoning as above -- degrade to the canned line rather than error the visitor.
+  } catch (e) {
+    // An AI call erroring here (as opposed to isAiConfigured() being false above) means
+    // something is actually broken -- rate limit, bad key, model outage -- worth ALLEN/
+    // ALLIE knowing about even though the visitor still gets a clean fallback either way.
+    logSiteFault("vale_reply", e instanceof Error ? e.message : String(e)).catch(() => {});
     return { text: FALLBACK_REPLIES[promptKey], ...(productLink ? { productLink } : {}) };
   }
 }
@@ -120,27 +123,30 @@ export async function generateValeReply(promptKey: ValePromptKey, productId?: Pr
  */
 const REPORT_SYSTEM_PROMPT =
   "You are Vale, HVN Havenry's concierge, writing a brief internal note for the business " +
-  "team (not a customer-facing message). Summarize recent showroom interest in 2-3 plain " +
-  "sentences. Only use the aggregate numbers given -- never invent detail, never mention a " +
-  "specific visitor.";
+  "team (not a customer-facing message). Summarize recent showroom interest AND flag any " +
+  "site faults in 2-4 plain sentences. Only use the aggregate numbers given -- never invent " +
+  "detail, never mention a specific visitor. If there are no faults, don't dwell on it -- one " +
+  "clause is enough.";
 
 export async function generateValeReport(windowHours = 24): Promise<string> {
-  const summary = await getInteractionSummary(windowHours);
-
-  if (summary.totalInteractions === 0) {
-    return `No concierge interactions in the last ${windowHours}h.`;
-  }
+  const [summary, faults] = await Promise.all([getInteractionSummary(windowHours), getSiteFaultSummary(windowHours)]);
 
   const byKeyLines = summary.byPromptKey.map((k) => `${k.promptKey}: ${k.count}`).join(", ");
   const topProductLines = summary.topProducts
     .map((p) => `${PRODUCTS[p.productId as ProductId]?.name ?? p.productId}: ${p.count}`)
     .join(", ");
+  const faultLine = faults.totalFaults > 0 ? `${faults.totalFaults} site fault(s) logged (e.g. ${faults.recent[0]?.message}).` : "";
+
+  if (summary.totalInteractions === 0 && faults.totalFaults === 0) {
+    return `No concierge interactions or site faults in the last ${windowHours}h.`;
+  }
 
   if (!isAiConfigured()) {
     return [
       `${summary.totalInteractions} concierge interactions in the last ${windowHours}h.`,
       byKeyLines ? `By type: ${byKeyLines}.` : "",
-      topProductLines ? `Most asked about: ${topProductLines}.` : ""
+      topProductLines ? `Most asked about: ${topProductLines}.` : "",
+      faultLine
     ]
       .filter(Boolean)
       .join(" ");
@@ -158,7 +164,9 @@ export async function generateValeReport(windowHours = 24): Promise<string> {
           content: [
             `Window: last ${windowHours}h. Total concierge interactions: ${summary.totalInteractions}.`,
             byKeyLines ? `By prompt type: ${byKeyLines}.` : "",
-            topProductLines ? `Most asked-about products: ${topProductLines}.` : ""
+            topProductLines ? `Most asked-about products: ${topProductLines}.` : "",
+            `Site faults logged: ${faults.totalFaults}.`,
+            faults.recent.length ? `Recent fault messages: ${faults.recent.map((f) => `[${f.source}] ${f.message}`).join(" | ")}` : ""
           ]
             .filter(Boolean)
             .join("\n")
@@ -172,31 +180,33 @@ export async function generateValeReport(windowHours = 24): Promise<string> {
       .join("")
       .trim();
 
-    return text || `${summary.totalInteractions} concierge interactions in the last ${windowHours}h.`;
+    return text || `${summary.totalInteractions} concierge interactions in the last ${windowHours}h. ${faultLine}`.trim();
   } catch {
-    return `${summary.totalInteractions} concierge interactions in the last ${windowHours}h. (AI summary unavailable.)`;
+    return `${summary.totalInteractions} concierge interactions in the last ${windowHours}h. ${faultLine} (AI summary unavailable.)`.trim();
   }
 }
 
 /**
- * Live M2M delegation -- Cappo (AMG) or ALLIE/ALLEN asking Vale a one-off question about
- * HVN showroom activity or the catalog. Distinct from generateValeReply: this is NOT the
- * public surface (only reachable with AGENT_API_KEY, see api/agent/route.ts), so it's
- * safe to accept a task string here -- the caller is a trusted internal agent, not an
- * anonymous visitor. Still grounded only in the aggregate interaction summary + static
- * catalog, same as the report -- never a specific visitor's conversation (there is none
- * to leak; no visitor identity is ever collected).
+ * Live M2M delegation -- Cappo (AMG), ALLIE, or ALLEN directly asking Vale a one-off
+ * question: showroom/marketing activity, catalog questions, or "is anything broken on
+ * the site." Distinct from generateValeReply: this is NOT the public surface (only
+ * reachable with AGENT_API_KEY, see api/agent/route.ts), so it's safe to accept a task
+ * string here -- the caller is a trusted internal agent, not an anonymous visitor.
+ * Still grounded only in aggregate data + the static catalog + the site-fault log, same
+ * as the report -- never a specific visitor's conversation (there is none to leak; no
+ * visitor identity is ever collected).
  */
 export async function runValeAgent(task: string): Promise<string> {
   if (!isAiConfigured()) {
     return "Vale isn't AI-configured on this deployment yet (ANTHROPIC_API_KEY unset).";
   }
 
-  const summary = await getInteractionSummary(24 * 7);
+  const [summary, faults] = await Promise.all([getInteractionSummary(24 * 7), getSiteFaultSummary(24 * 7)]);
   const byKeyLines = summary.byPromptKey.map((k) => `${k.promptKey}: ${k.count}`).join(", ");
   const topProductLines = summary.topProducts
     .map((p) => `${PRODUCTS[p.productId as ProductId]?.name ?? p.productId}: ${p.count}`)
     .join(", ");
+  const faultLines = faults.recent.map((f) => `[${f.source}] ${f.message}`).join(" | ");
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   try {
@@ -204,13 +214,17 @@ export async function runValeAgent(task: string): Promise<string> {
       model: process.env.VALE_MODEL || "claude-sonnet-5",
       max_tokens: 500,
       system:
-        "You are Vale, HVN Havenry's concierge, answering a question from Cappo (AMG's operations AI) or ALLEN " +
-        "about HVN showroom activity for HVN<->AMG business coordination. Answer only from the aggregate data " +
-        "given below and the static catalog -- never invent numbers, never claim to know a specific visitor.\n\n" +
+        "You are Vale, HVN Havenry's concierge, answering a question from Cappo (AMG's operations AI), ALLIE, " +
+        "or ALLEN directly -- for HVN<->AMG business/marketing coordination, or checking whether anything is " +
+        "broken on the site. Answer only from the aggregate data given below and the static catalog -- never " +
+        "invent numbers, never claim to know a specific visitor. If asked about site health/faults and none are " +
+        "logged, say so plainly rather than guessing at problems.\n\n" +
         `HVN Havenry catalog:\n${catalogContext()}\n\n` +
-        `Last 7 days -- total interactions: ${summary.totalInteractions}.` +
+        `Last 7 days -- total concierge interactions: ${summary.totalInteractions}.` +
         (byKeyLines ? ` By type: ${byKeyLines}.` : "") +
-        (topProductLines ? ` Most asked about: ${topProductLines}.` : ""),
+        (topProductLines ? ` Most asked about: ${topProductLines}.` : "") +
+        `\nSite faults logged (last 7 days): ${faults.totalFaults}.` +
+        (faultLines ? ` Recent: ${faultLines}` : ""),
       messages: [{ role: "user", content: task }]
     });
 
@@ -222,6 +236,8 @@ export async function runValeAgent(task: string): Promise<string> {
 
     return text || "(Vale returned nothing)";
   } catch (e) {
-    return `Vale call failed: ${e instanceof Error ? e.message : String(e)}`;
+    const message = e instanceof Error ? e.message : String(e);
+    logSiteFault("vale_agent", message).catch(() => {});
+    return `Vale call failed: ${message}`;
   }
 }

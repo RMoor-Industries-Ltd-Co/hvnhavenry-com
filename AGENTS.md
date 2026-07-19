@@ -16,7 +16,7 @@ enums before Vale's system prompt is ever built. Do not add a chat box or any fi
 lets a visitor's own words reach the model; that's the whole safety model for a public,
 unauthenticated AI surface with no rate-limited API key.
 
-Distinct from `rmg-piaar-system`'s VALE.md governance contract and from Cappo/Constance's
+Distinct from `rmg-piaar-system`'s `contracts/24-vale-hvn-concierge.md` governance contract and from Cappo/Constance's
 backend-only executive-report agents elsewhere in PIAAR — this is the live, user-facing
 half. Falls back to static on-brand copy (`FALLBACK_REPLIES` in `vale.ts`) whenever
 `ANTHROPIC_API_KEY` isn't configured, so the concierge widget is never broken for a

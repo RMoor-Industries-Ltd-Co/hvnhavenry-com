@@ -36,9 +36,36 @@ interface HavenStore {
   conciergeSummoned: boolean;
   summonConcierge: () => void;
   dismissConcierge: () => void;
+
+  // Full-screen loader shown only when the visitor is *sent* to the showroom via the
+  // "View Showroom" action (not on manual scroll). Covers the S2 parallax, then fades.
+  loaderActive: boolean;
+  showLoader: () => void;
+  hideLoader: () => void;
+  // Scroll to any section behind the loader, hiding it once arrived. Use this for every
+  // button-driven jump so the loader covers the parallax during the move.
+  navigate: (id: string) => void;
+  // Convenience: navigate to the showroom (S3) behind the loader.
+  viewShowroom: () => void;
+
+  // True while the footer is in view — used to stop the concierge launcher from
+  // floating over the footer section.
+  inFooter: boolean;
+  setInFooter: (inFooter: boolean) => void;
+
+  // Cart — a set of product ids (each product appears once). "Acquire this room"
+  // adds every product offered on the active collection's page.
+  cart: ProductId[];
+  addToCart: (id: ProductId) => void;
+  addRoomToCart: (ids: ProductId[]) => void;
+  removeFromCart: (id: ProductId) => void;
+  clearCart: () => void;
+  cartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
-export const useHavenStore = create<HavenStore>((set) => ({
+export const useHavenStore = create<HavenStore>((set, get) => ({
   activeCollection: COLLECTION_ORDER[0],
   setActiveCollection: (collection) =>
     set({ activeCollection: collection, activeTabItem: null }),
@@ -62,4 +89,36 @@ export const useHavenStore = create<HavenStore>((set) => ({
   conciergeSummoned: false,
   summonConcierge: () => set({ conciergeSummoned: true }),
   dismissConcierge: () => set({ conciergeSummoned: false }),
+
+  loaderActive: false,
+  showLoader: () => set({ loaderActive: true }),
+  hideLoader: () => set({ loaderActive: false }),
+  navigate: (id) => {
+    const { scrollToSection } = get();
+    set({ loaderActive: true });
+    if (scrollToSection) {
+      scrollToSection(id, () => set({ loaderActive: false }));
+    } else {
+      set({ loaderActive: false });
+    }
+  },
+  viewShowroom: () => get().navigate("the-room"),
+
+  inFooter: false,
+  setInFooter: (inFooter) => set({ inFooter }),
+
+  cart: [],
+  addToCart: (id) =>
+    set((s) => (s.cart.includes(id) ? s : { cart: [...s.cart, id] })),
+  addRoomToCart: (ids) =>
+    set((s) => {
+      const merged = [...s.cart];
+      for (const id of ids) if (!merged.includes(id)) merged.push(id);
+      return { cart: merged };
+    }),
+  removeFromCart: (id) => set((s) => ({ cart: s.cart.filter((c) => c !== id) })),
+  clearCart: () => set({ cart: [] }),
+  cartOpen: false,
+  openCart: () => set({ cartOpen: true }),
+  closeCart: () => set({ cartOpen: false }),
 }));

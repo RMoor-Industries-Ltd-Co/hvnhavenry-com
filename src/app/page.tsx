@@ -7,6 +7,7 @@ import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
 import { GoldenDivider } from "@/components/ui/GoldenDivider";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
+import { LoaderOverlay } from "@/components/ui/LoaderOverlay";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
@@ -134,6 +135,17 @@ export default function Home() {
         })
       : null;
 
+    // Footer presence — stops the concierge launcher from floating over the footer.
+    const footerEl = document.getElementById("site-footer");
+    const footerTrigger = footerEl
+      ? ScrollTrigger.create({
+          trigger: footerEl,
+          start: "top 90%",
+          onEnter: () => useHavenStore.getState().setInFooter(true),
+          onLeaveBack: () => useHavenStore.getState().setInFooter(false),
+        })
+      : null;
+
     // Recompute positions after the pinned ScrollStory registers its own trigger.
     ScrollTrigger.refresh();
 
@@ -182,6 +194,7 @@ export default function Home() {
       lenis.destroy();
       navTriggers.forEach((t) => t?.kill());
       conciergeTrigger?.kill();
+      footerTrigger?.kill();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, [setScrollToSection, setActiveNavSection]);
@@ -190,6 +203,7 @@ export default function Home() {
     <main>
       <NavBar />
       <ValeConcierge />
+      <LoaderOverlay />
 
       {/* Hero */}
       <section id="top" className="relative h-screen w-full overflow-hidden">
@@ -204,14 +218,11 @@ export default function Home() {
         <ScrollStory />
       </div>
 
-      <GoldenDivider />
-
-      {/* Section 3: Interactive room tabs — the concierge / shopping destination */}
+      {/* Section 3: Interactive room tabs — the concierge / shopping destination.
+          RoomTabs carries its own top + bottom dividers so they bound the section. */}
       <div id="concierge">
         <RoomTabs />
       </div>
-
-      <GoldenDivider />
 
       {/* Section 4: Video reveal (return is via the nav's "Return to Showroom") */}
       <VideoRevealSection />
@@ -219,7 +230,7 @@ export default function Home() {
       <GoldenDivider />
 
       {/* Section 5: Footer */}
-      <footer className="border-t border-[#c9a96e]/10 pt-16 pb-10 px-8 lg:px-16 bg-[#0d0b09]">
+      <footer id="site-footer" className="border-t border-[#c9a96e]/10 pt-16 pb-10 px-8 lg:px-16 bg-[#0d0b09]">
         <div className="flex flex-col md:flex-row items-start justify-between gap-12 pb-12">
           <div>
             <div className="font-display text-3xl tracking-[0.3em] text-[#c9a96e] mb-1">HVN</div>
