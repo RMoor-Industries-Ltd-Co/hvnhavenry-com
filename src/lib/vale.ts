@@ -15,7 +15,7 @@ import { getInteractionSummary } from "./db";
  * because nothing she's ever given as input is attacker-controlled prose.
  */
 
-export const VALE_PROMPT_KEYS = ["welcome", "speak_to_concierge", "view_cart", "acquire_this"] as const;
+export const VALE_PROMPT_KEYS = ["welcome", "speak_to_concierge", "view_cart", "store_info", "product_details", "acquire_this"] as const;
 export type ValePromptKey = (typeof VALE_PROMPT_KEYS)[number];
 
 export function isValePromptKey(value: unknown): value is ValePromptKey {
@@ -47,6 +47,8 @@ const FALLBACK_REPLIES: Record<ValePromptKey, string> = {
   welcome: "Welcome to HVN Havenry. I'm Vale -- take your time in the showroom, and call on me whenever you'd like a hand.",
   speak_to_concierge: "I'm here whenever you'd like guidance through the collection -- just say the word.",
   view_cart: "Your selections are ready whenever you'd like to complete checkout.",
+  store_info: "The HVN Havenry is our showroom of curated great rooms -- browse the collections here, and every piece checks out securely through our atelier. I'm here whenever you'd like guidance.",
+  product_details: "Tell me which piece draws your eye and I'll share its details -- or explore the showroom and I'll walk you through it.",
   acquire_this: "A fine choice. Whenever you're ready, checkout awaits."
 };
 
@@ -58,6 +60,12 @@ function userTurnFor(promptKey: ValePromptKey, product?: (typeof PRODUCTS)[Produ
       return "The visitor has asked to speak with you directly. Offer warm, general guidance for exploring the showroom -- you don't know what they're looking at yet.";
     case "view_cart":
       return "The visitor wants to view their cart / proceed toward checkout. Reassure them their selections are ready and invite them to continue.";
+    case "store_info":
+      return "The visitor wants general information about the HVN Havenry store. Warmly explain what the Havenry is -- a curated showroom of great rooms -- and how to browse and check out, grounded strictly in the catalog. Keep it brief and inviting.";
+    case "product_details":
+      return product
+        ? `The visitor wants details on "${product.name}" (${product.tagline}). Share what makes it distinctive, grounded strictly in the catalog, and invite them to explore or acquire it.`
+        : "The visitor wants product details but hasn't chosen a piece yet. Invite them to pick one in the showroom and offer to walk them through it.";
     case "acquire_this":
       return product
         ? `The visitor wants to acquire "${product.name}" (${product.tagline}). Confirm their choice warmly and invite them to complete checkout.`

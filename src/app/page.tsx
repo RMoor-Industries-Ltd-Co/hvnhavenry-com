@@ -7,7 +7,6 @@ import Lenis from "lenis";
 import { NavBar } from "@/components/ui/NavBar";
 import { GoldenDivider } from "@/components/ui/GoldenDivider";
 import { ValeConcierge } from "@/components/ui/ValeConcierge";
-import { ConciergeReveal } from "@/components/ui/ConciergeReveal";
 import { HeroOverlay } from "@/components/parallax/HeroOverlay";
 import { HeroBackground } from "@/components/parallax/HeroBackground";
 import { ScrollStory } from "@/components/parallax/ScrollStory";
@@ -191,7 +190,6 @@ export default function Home() {
     <main>
       <NavBar />
       <ValeConcierge />
-      <ConciergeReveal />
 
       {/* Hero */}
       <section id="top" className="relative h-screen w-full overflow-hidden">
