@@ -17,13 +17,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HVN Havenry — Curated Great Rooms",
+  title: "HVN Havenry — Atmosphere, Ritual & Elevated Living",
   description:
-    "Discover extraordinary living spaces. HVN Havenry crafts bespoke luxury environments — library walls, corner bars, executive desks, and plush sofas worthy of your grandest imagination.",
-  keywords: ["luxury furniture", "great rooms", "bespoke interiors", "HVN Havenry"],
+    "HVN Havenry composes atmosphere — ember lines, chambers, diffusers, and room mists crafted to shape the character of a space. Not a store, a Havenry.",
+  keywords: ["HVN Havenry", "ember line", "atmosphere", "home fragrance", "chambers", "diffusers", "room mist", "ritual"],
   openGraph: {
-    title: "HVN Havenry — Curated Great Rooms",
-    description: "Rooms only one can dream of. Now yours.",
+    title: "HVN Havenry — Atmosphere, Ritual & Elevated Living",
+    description: "Atmosphere, considered. Not a store, a Havenry.",
     type: "website",
   },
 };

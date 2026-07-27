@@ -156,7 +156,7 @@ body {
   );
 }
 
-/* Rising smoke wisp — an ambient incense-style stream. Pure CSS, GPU-friendly
+/* Rising smoke wisp — an ambient smoke-style stream. Pure CSS, GPU-friendly
    (transform/opacity only). Puffs are staggered to read as a continuous stream. */
 @keyframes smoke-rise {
   0%   { transform: translateY(0) translateX(0) scale(0.35); opacity: 0; }
