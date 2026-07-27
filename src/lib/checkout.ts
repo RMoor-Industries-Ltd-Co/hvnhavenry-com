@@ -1,8 +1,8 @@
-// The shop domain the "Acquire This Piece" flow hands off to. Right now this serves the
-// mock Shopify-style page (this same app, once shophvn.com points here); later it will
-// point at the real Shopify storefront. Keeping the origin in one place makes that swap
-// a one-line change.
-export const SHOP_ORIGIN = "https://www.shophvn.com";
+// The origin the "Acquire This Piece" flow hands off to. Empty string = same origin
+// (hvnhavenry.com), so the mock checkout deep link resolves right now without any DNS.
+// When shophvn.com is pointed at the store, set this to "https://www.shophvn.com" — a
+// one-line swap and the whole flow retargets.
+export const SHOP_ORIGIN = "";
 
 // A mock order/session id, generated fresh per hand-off (client-side).
 export function newOrderId(): string {
