@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHavenStore } from "@/lib/store";
 import { PRODUCTS } from "@/lib/products";
 
-// Default promo reel — pulled via the asset pipeline (video__promo__default).
-// A missing/not-yet-pulled file degrades to the empty frame rather than a broken tag.
-const PROMO_SRC = "/assets/video/video__promo__default.mp4";
+// Default promo — a two-part playlist pulled via the asset pipeline
+// (video__promo__default__01 / __02). Part 1 plays once, then part 2 plays and
+// loops. A missing/not-yet-pulled file degrades to the empty frame rather than a
+// broken tag.
+const PROMO_SRCS = [
+  "/assets/video/video__promo__default__01.mp4",
+  "/assets/video/video__promo__default__02.mp4",
+];
 
 export function VideoRevealSection() {
   const activeVideoProduct = useHavenStore((s) => s.activeVideoProduct);
@@ -14,6 +19,11 @@ export function VideoRevealSection() {
 
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Which clip of the promo playlist is showing. Part 1 (index 0) plays once and,
+  // on `ended`, advances to part 2 (the last), which loops forever.
+  const [promoIndex, setPromoIndex] = useState(0);
+  const isLastPromo = promoIndex === PROMO_SRCS.length - 1;
 
   // Perf: the promo is heavy (preload="none"). Only load + play once the section
   // scrolls into view; pause when it leaves. Re-attaches when the promo remounts.
@@ -32,6 +42,16 @@ export function VideoRevealSection() {
     io.observe(section);
     return () => io.disconnect();
   }, [activeVideoProduct]);
+
+  // When part 1 finishes and we advance the playlist, the <video> src changes —
+  // load the new clip and continue playing straight into it (we're already in view).
+  useEffect(() => {
+    if (promoIndex === 0) return; // first clip is started by the IntersectionObserver
+    const video = videoRef.current;
+    if (!video) return;
+    video.load();
+    video.play().catch(() => {});
+  }, [promoIndex]);
 
   return (
     <section
@@ -64,12 +84,15 @@ export function VideoRevealSection() {
             <video
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
-              src={PROMO_SRC}
+              src={PROMO_SRCS[promoIndex]}
               preload="none"
               muted
-              loop
+              loop={isLastPromo}
               playsInline
               controls
+              onEnded={() => {
+                if (!isLastPromo) setPromoIndex((i) => i + 1);
+              }}
             />
             <p className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-[#c9a96e] opacity-50 text-xs tracking-[0.3em] uppercase font-sans">
               HVN Havenry — Featured

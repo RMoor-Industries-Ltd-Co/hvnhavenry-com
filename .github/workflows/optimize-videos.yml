@@ -1,0 +1,52 @@
+name: Optimize videos
+
+# One-shot, manual: re-encode the manifest's .mp4 masters in Drive to web-optimized
+# H.264 (+faststart) so the deploy-time asset pull fetches already-small files. Run
+# this whenever a new/updated video lands in Drive. It replaces each file in place
+# (same Drive id); Drive revision history keeps the original master.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Encode + report sizes but do NOT write back to Drive"
+        type: boolean
+        default: false
+      max_width:
+        description: "Max output width in px (never upscales)"
+        type: string
+        default: "1920"
+      crf:
+        description: "x264 CRF (lower = higher quality/larger; 23–26 typical)"
+        type: string
+        default: "24"
+
+concurrency:
+  group: optimize-videos
+  cancel-in-progress: false
+
+jobs:
+  optimize:
+    name: Optimize videos in Drive
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Optimize
+        env:
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          MAX_WIDTH: ${{ inputs.max_width }}
+          CRF: ${{ inputs.crf }}
+        run: node scripts/optimize-videos.mjs

@@ -91,8 +91,11 @@ its id to `CENTERED_IDS`; otherwise it top-aligns with the `-80` offset.
 
 ## 5. Video (S4) contract (`VideoRevealSection`)
 
-Always-present promo player. Default = promo reel (`video__promo__default`), lazy-loaded
-(`preload="none"`) and played only when in view via IntersectionObserver. A product's
+Always-present promo player. Default = a **two-part promo playlist**
+(`video__promo__default__01` then `__02`): part 1 plays **once**, then on `ended` the player
+advances to part 2, which **loops** forever (`loop` is set only on the last clip). Both are
+lazy-loaded (`preload="none"`) and played only when in view via IntersectionObserver; adding
+a third clip is just another `PROMO_SRCS` entry (the last one always loops). A product's
 **Watch the Film** sets `activeVideoProduct` to swap in that film. **No ✕/close control on
 the player** — the only exit is the nav's **Return to Showroom** (it reads as "leave the
 video", not "dismiss it"). Return resets to the promo.
