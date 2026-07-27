@@ -238,7 +238,7 @@ export default function Home() {
               Havenry
             </p>
             <p className="text-xs text-[#e8dcc8] opacity-40 font-sans tracking-wide max-w-xs">
-              Curated great rooms for the discerning few.
+              A haven for ambiance, ritual, and elevated living.
             </p>
           </div>
 
@@ -253,7 +253,7 @@ export default function Home() {
                   return (
                     <a
                       key={link}
-                      href="#"
+                      href={link === "Contact" ? "/contact" : "#"}
                       onClick={
                         isConcierge
                           ? (e) => {
