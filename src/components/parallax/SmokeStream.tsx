@@ -1,4 +1,4 @@
-// Ambient rising smoke wisp (incense-style). Purely decorative — a column of
+// Ambient rising smoke wisp (smoke-style). Purely decorative — a column of
 // staggered CSS puffs that read as one continuous stream. `className` positions/
 // sizes the column where it's placed.
 const PUFF_COUNT = 6;
