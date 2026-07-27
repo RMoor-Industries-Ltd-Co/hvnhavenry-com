@@ -8,6 +8,7 @@ export interface Product {
   description: string;
   details: string[];
   price: string;
+  /** Reference only — actual purchase flow is the internal mock checkout at /cart → /checkout. */
   shopifyUrl: string;
   accentColor: string;
   roomPosition: string;

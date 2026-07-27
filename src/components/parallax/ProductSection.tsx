@@ -146,7 +146,7 @@ export function ProductSection({ product, index }: ProductSectionProps) {
             {product.price}
           </p>
 
-          <BuyButton url={product.shopifyUrl} />
+          <BuyButton productId={product.id} />
         </div>
       </div>
 
