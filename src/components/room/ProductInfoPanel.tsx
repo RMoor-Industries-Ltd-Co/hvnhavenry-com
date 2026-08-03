@@ -43,6 +43,21 @@ export function ProductInfoPanel({ product, onClose }: ProductInfoPanelProps) {
             <p className="text-sm leading-relaxed text-[#e8dcc8] opacity-70 font-sans mb-6">
               {product.description}
             </p>
+
+            {product.details?.length > 0 && (
+              <ul className="mb-6 space-y-2">
+                {product.details.map((detail) => (
+                  <li
+                    key={detail}
+                    className="flex items-start gap-3 text-sm text-[#e8dcc8] opacity-60 font-sans"
+                  >
+                    <span className="text-[#c9a96e] mt-0.5 shrink-0">—</span>
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <p className="font-display text-2xl text-[#c9a96e] mb-6 tracking-wide">
               {product.price}
             </p>

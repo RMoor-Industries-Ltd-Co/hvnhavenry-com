@@ -109,23 +109,25 @@ export function ValeConcierge() {
       <div
         onClick={armIdle}
         aria-hidden={!summoned}
-        className={`fixed bottom-0 left-0 z-[60] flex items-end transition-all duration-700 ease-out ${
+        className={`fixed bottom-0 left-0 z-[60] transition-all duration-700 ease-out ${
           summoned ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
         }`}
       >
-        <div className="relative h-[50vh] w-[33vh] shrink-0">
+        {/* Vale — square box so the square portrait renders at the full 50% viewport
+            height (a narrower box would letterbox him down). */}
+        <div className="relative h-[50vh] w-[50vh]">
           <Image
             src="/assets/characters/vale/character__vale__concierge.png"
             alt="Vale, the HVN Havenry concierge"
             fill
             priority
-            sizes="33vh"
+            sizes="50vh"
             className="pointer-events-none select-none object-contain object-bottom"
           />
-        </div>
 
-        {/* His dialogue — a rectangular caption to his right, on the left of the screen */}
-        <div className="relative mb-[10vh] w-72 max-w-[80vw] bg-[#0d0b09]/95 px-5 py-4 backdrop-blur-md border border-[#c9a96e]/30">
+        {/* His dialogue — a caption overlapping his right side, so the pair stays within
+            the mobile viewport instead of overflowing off-screen. */}
+        <div className="absolute bottom-[15%] left-[47%] w-64 max-w-[62vw] bg-[#0d0b09]/95 px-5 py-4 backdrop-blur-md border border-[#c9a96e]/30">
           <span className="absolute -left-2 top-6 h-0 w-0 border-y-8 border-y-transparent border-r-8 border-r-[#c9a96e]/30" />
           <button
             onClick={dismissConcierge}
@@ -160,6 +162,7 @@ export function ValeConcierge() {
               </button>
             ))}
           </div>
+        </div>
         </div>
       </div>
 
