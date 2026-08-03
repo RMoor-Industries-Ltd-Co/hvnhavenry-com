@@ -20,7 +20,11 @@ Distinct from `rmg-piaar-system`'s `contracts/24-vale-hvn-concierge.md` governan
 backend-only executive-report agents elsewhere in PIAAR — this is the live, user-facing
 half. Falls back to static on-brand copy (`FALLBACK_REPLIES` in `vale.ts`) whenever
 `ANTHROPIC_API_KEY` isn't configured, so the concierge widget is never broken for a
-visitor even before the AI is wired up.
+visitor even before the AI is wired up. `ANTHROPIC_API_KEY` here is hvnhavenry-com's own
+dedicated key — the `Vale` workspace/key in the "RMoor Industries Ltd Co." Anthropic
+Console org (login `rahmind.consulting@rmoorind.com`). Not shared with any other PIAAR
+repo, and distinct from Rahm's personal Claude.ai Max plan login. See
+`rmg-piaar-system/CLAUDE.md` for the full per-project key mapping.
 
 ## Vale's HVN<->AMG backend channel (pull-ready for Cappo/ALLIE/ALLEN)
 
