@@ -1,6 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+
+// Footer links that resolve to real mock pages.
+const FOOTER_HREFS: Record<string, string> = {
+  Contact: "/contact",
+  "Track Order": "/account",
+};
 
 // A mock Shopify-style product/checkout page for the Transitional Ember Line — served at
 // the shophvn.com deep link a visitor reaches from "Acquire This Piece". No real payment
@@ -230,11 +237,19 @@ export function MockCheckout({ order }: { order: string }) {
             <div key={col}>
               <p className="text-[11px] uppercase tracking-[0.25em] text-[#c9a96e] opacity-70 mb-3 font-sans">{col}</p>
               <ul className="flex flex-col gap-2">
-                {links.map((l) => (
-                  <li key={l} className="text-xs text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors cursor-pointer font-sans">
-                    {l}
-                  </li>
-                ))}
+                {links.map((l) =>
+                  FOOTER_HREFS[l] ? (
+                    <li key={l}>
+                      <Link href={FOOTER_HREFS[l]} className="text-xs text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors font-sans">
+                        {l}
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={l} className="text-xs text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors cursor-pointer font-sans">
+                      {l}
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           ))}
