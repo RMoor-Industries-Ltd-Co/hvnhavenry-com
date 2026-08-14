@@ -2,9 +2,9 @@
   "$schema": "./scripts/assets.manifest.schema.json",
   "assets": [
     {
-      "driveFileId": "1JDZQCVr3AKn45riWxQ2pIFiq0ltQwbo5",
-      "name": "hero__hvn-havenry__section01.png",
-      "destPath": "assets/hero/hero__hvn-havenry__section01.png"
+      "driveFileId": "1ILf3ub4evafe451QSATY1rxbYzt-YAV6",
+      "name": "hero__hvn-havenry__section01.mp4",
+      "destPath": "assets/hero/hero__hvn-havenry__section01.mp4"
     },
     {
       "driveFileId": "1wz-lDYv9U8qhqa8Pb-3l9ya8_75Nw8Kv",

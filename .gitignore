@@ -57,6 +57,10 @@ next-env.d.ts
 !/public/assets/characters/vale/character__vale__concierge.png
 !/public/assets/mark/
 !/public/assets/mark/mark__aure__loading.mp4
+# Section-1 hero background film — committed bridge until GDRIVE_* creds are wired
+# and `npm run assets:pull` can own it (same pattern as the Vale/loader assets above).
+!/public/assets/hero/
+!/public/assets/hero/hero__hvn-havenry__section01.mp4
 
 /public/favicon.svg
 /public/favicon-512.png
