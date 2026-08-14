@@ -36,12 +36,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="bg-[#0d0b09] text-[#e8dcc8] antialiased overflow-x-hidden">
-        {/* Preload the Section 1 hero so it paints immediately (React 19 hoists this
-            to <head>). The section-2 splash is intentionally left to load lazily. */}
+        {/* Preload the Section 1 hero film so it starts buffering immediately (React 19
+            hoists this to <head>). The section-2 splash is intentionally left lazy. */}
         <link
           rel="preload"
-          as="image"
-          href="/assets/hero/hero__hvn-havenry__section01.png"
+          as="video"
+          href="/assets/hero/hero__hvn-havenry__section01.mp4"
+          type="video/mp4"
           fetchPriority="high"
         />
         <LandscapeGate>{children}</LandscapeGate>
