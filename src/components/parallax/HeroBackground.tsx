@@ -13,6 +13,9 @@ export function HeroBackground() {
         playsInline
         preload="auto"
       >
+        {/* WebM first (smaller, VP9) — browsers pick the first supported type;
+            MP4 (H.264) is the universal fallback for Safari/iOS. */}
+        <source src="/assets/hero/hero__hvn-havenry__section01.webm" type="video/webm" />
         <source src="/assets/hero/hero__hvn-havenry__section01.mp4" type="video/mp4" />
       </video>
 
