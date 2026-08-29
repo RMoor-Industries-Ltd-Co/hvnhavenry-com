@@ -61,6 +61,7 @@ next-env.d.ts
 # and `npm run assets:pull` can own it (same pattern as the Vale/loader assets above).
 !/public/assets/hero/
 !/public/assets/hero/hero__hvn-havenry__section01.mp4
+!/public/assets/hero/hero__hvn-havenry__section01.webm
 
 /public/favicon.svg
 /public/favicon-512.png
