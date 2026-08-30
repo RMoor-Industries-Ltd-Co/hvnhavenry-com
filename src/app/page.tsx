@@ -18,7 +18,7 @@ import { useHavenStore } from "@/lib/store";
 const FOOTER_LINKS = {
   Shop: ["Atmos Ritual", "HVN Chamber", "HVN Living", "Standard Line"],
   Company: ["The Room", "Bespoke", "Contact", "Speak to Concierge"],
-  Legal: ["Terms & Conditions", "Shipping", "Privacy", "Cookie Notice"],
+  Legal: ["Terms & Conditions", "Shipping", "Privacy Policy", "Cookie Notice"],
 };
 
 // Footer links that resolve to a real page. Anything not listed stays "#" for now
@@ -26,7 +26,7 @@ const FOOTER_LINKS = {
 // via its own onClick below, not this map.
 const FOOTER_HREFS: Record<string, string> = {
   Contact: "/contact",
-  Privacy: "/privacy",
+  "Privacy Policy": "/privacy",
   "Cookie Notice": "/cookies",
 };
 
