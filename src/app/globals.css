@@ -134,13 +134,7 @@ body {
    understand image-set use the WebP when the pull step has generated it. Both
    declarations point at the same base name so it works whether or not the WebP
    sibling exists. */
-.bg-asset-hero01 {
-  background-image: url("/assets/hero/hero__hvn-havenry__section01.png");
-  background-image: image-set(
-    url("/assets/hero/hero__hvn-havenry__section01.webp") type("image/webp"),
-    url("/assets/hero/hero__hvn-havenry__section01.png") type("image/png")
-  );
-}
+/* (.bg-asset-hero01 removed — the S1 hero is now a <video>, not a CSS background image.) */
 .bg-asset-splash02 {
   background-image: url("/assets/marks/mark__hvn-havenry__splash_section02.png");
   background-image: image-set(
