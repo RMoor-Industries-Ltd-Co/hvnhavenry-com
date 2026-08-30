@@ -18,7 +18,16 @@ import { useHavenStore } from "@/lib/store";
 const FOOTER_LINKS = {
   Shop: ["Atmos Ritual", "HVN Chamber", "HVN Living", "Standard Line"],
   Company: ["The Room", "Bespoke", "Contact", "Speak to Concierge"],
-  Legal: ["Terms & Conditions", "Shipping", "Privacy"],
+  Legal: ["Terms & Conditions", "Shipping", "Privacy Policy", "Cookie Notice"],
+};
+
+// Footer links that resolve to a real page. Anything not listed stays "#" for now
+// (Terms & Conditions / Shipping are still pending). "Speak to Concierge" is handled
+// via its own onClick below, not this map.
+const FOOTER_HREFS: Record<string, string> = {
+  Contact: "/contact",
+  "Privacy Policy": "/privacy",
+  "Cookie Notice": "/cookies",
 };
 
 if (typeof window !== "undefined") {
@@ -253,7 +262,7 @@ export default function Home() {
                   return (
                     <a
                       key={link}
-                      href={link === "Contact" ? "/contact" : "#"}
+                      href={FOOTER_HREFS[link] ?? "#"}
                       onClick={
                         isConcierge
                           ? (e) => {
