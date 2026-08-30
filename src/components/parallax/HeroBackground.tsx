@@ -42,7 +42,11 @@ export function HeroBackground() {
   const [params, setParams] = useState<HeroParams>(DEFAULT_PARAMS);
 
   useEffect(() => {
-    setParams(readParams());
+    // Defer the first setState out of the synchronous effect body (params come from
+    // window.location, a client-only source) so it doesn't trip react-hooks/set-state-in-effect
+    // and stays a clean SSR-default → client-params transition.
+    const id = setTimeout(() => setParams(readParams()), 0);
+    return () => clearTimeout(id);
   }, []);
 
   const { fit, pos, guides, hud } = params;
