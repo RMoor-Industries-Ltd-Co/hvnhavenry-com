@@ -63,7 +63,13 @@ export function ShopShell({ children }: { children: ReactNode }) {
             </ul>
           </div>
         </div>
-        <p className="mx-auto mt-10 max-w-5xl text-[11px] text-[#e8dcc8]/40 font-sans">© 2026 HVN Havenry. All rights reserved.</p>
+        <div className="mx-auto mt-10 flex max-w-5xl flex-col gap-3 border-t border-[#c9a96e]/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[11px] text-[#e8dcc8]/40 font-sans">© 2026 HVN Havenry. All rights reserved.</p>
+          <div className="flex gap-5 text-[11px] font-sans">
+            <Link href="/privacy" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Privacy Policy</Link>
+            <Link href="/cookies" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Cookie Notice</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
