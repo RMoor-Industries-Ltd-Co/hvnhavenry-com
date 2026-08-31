@@ -67,6 +67,7 @@ export function ShopShell({ children }: { children: ReactNode }) {
           <p className="text-[11px] text-[#e8dcc8]/40 font-sans">© 2026 HVN Havenry. All rights reserved.</p>
           <div className="flex gap-5 text-[11px] font-sans">
             <Link href="/terms" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Terms &amp; Conditions</Link>
+            <Link href="/shipping-returns" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Shipping &amp; Returns</Link>
             <Link href="/privacy" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Privacy Policy</Link>
             <Link href="/cookies" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Cookie Notice</Link>
           </div>
