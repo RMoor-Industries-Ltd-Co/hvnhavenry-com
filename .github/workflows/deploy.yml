@@ -51,23 +51,23 @@ jobs:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
-          # HVN Global's OWN secrets, deliberately distinct GitHub Actions secret
-          # entries from the GDRIVE_* ones above even though the short-term values
-          # may be copies of the same OAuth credential (see hvnglobalco-com's
-          # ASSETS.md "Credentials" section) -- keeps them independently rotatable
-          # from day one rather than accidentally sharing one secret across two
-          # sites' deploy pipelines. REQUIRED, not yet configured as of this PR --
-          # see the PR description.
-          GLOBAL_GDRIVE_CLIENT_ID: ${{ secrets.GLOBAL_GDRIVE_CLIENT_ID }}
-          GLOBAL_GDRIVE_CLIENT_SECRET: ${{ secrets.GLOBAL_GDRIVE_CLIENT_SECRET }}
-          GLOBAL_GDRIVE_REFRESH_TOKEN: ${{ secrets.GLOBAL_GDRIVE_REFRESH_TOKEN }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
-          # Pass the Doppler-synced Drive creds through to the SSH session so the
-          # deploy can write them into the container's runtime env file.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,GLOBAL_GDRIVE_CLIENT_ID,GLOBAL_GDRIVE_CLIENT_SECRET,GLOBAL_GDRIVE_REFRESH_TOKEN
+          # Pass the existing GitHub Actions Drive creds through to the SSH session
+          # so the deploy can write them into both apps' runtime env files. Global
+          # reuses the SAME OAuth credential as Havenry (both point at the one
+          # rmasters.group Google Drive OAuth identity, per hvnglobalco-com's
+          # ASSETS.md) -- no separate GLOBAL_GDRIVE_* secret is needed for that.
+          # What keeps the two sites' assets apart is the separate Drive folder +
+          # manifest inside hvnglobalco-com, not a separate credential.
+          #
+          # This repo's deploy does not use Doppler today (no `doppler run`, no
+          # DOPPLER_TOKEN) -- these are plain GitHub Actions repository secrets.
+          # Migrating this workflow to a Doppler-backed secret model is a
+          # separate, future infrastructure cleanup, not part of Phase A.
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN
           script: |
             set -e
             cd /srv/hvnhavenry
@@ -113,11 +113,14 @@ jobs:
             upsert_env .env.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
 
             # HVN Global's own runtime env file -- never .env.local above, per
-            # docs/separation-of-concerns.md in hvnglobalco-com.
+            # docs/separation-of-concerns.md in hvnglobalco-com. Same underlying
+            # GDRIVE_* credential values as .env.local (see the ssh-action env: block
+            # above for why), just written into a separate file so the two apps never
+            # share a config file, even though they share a credential.
             touch .env.global-preview.local
-            upsert_env .env.global-preview.local GDRIVE_CLIENT_ID "$GLOBAL_GDRIVE_CLIENT_ID"
-            upsert_env .env.global-preview.local GDRIVE_CLIENT_SECRET "$GLOBAL_GDRIVE_CLIENT_SECRET"
-            upsert_env .env.global-preview.local GDRIVE_REFRESH_TOKEN "$GLOBAL_GDRIVE_REFRESH_TOKEN"
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
+            upsert_env .env.global-preview.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
 
             docker compose build app
             # force-recreate so the container picks up the refreshed env file and
