@@ -26,6 +26,7 @@ const FOOTER_LINKS = {
 // via its own onClick below, not this map.
 const FOOTER_HREFS: Record<string, string> = {
   Contact: "/contact",
+  "Terms & Conditions": "/terms",
   "Privacy Policy": "/privacy",
   "Cookie Notice": "/cookies",
 };
