@@ -51,13 +51,28 @@ jobs:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          # HVN Global's OWN secrets, deliberately distinct GitHub Actions secret
+          # entries from the GDRIVE_* ones above even though the short-term values
+          # may be copies of the same OAuth credential (see hvnglobalco-com's
+          # ASSETS.md "Credentials" section) -- keeps them independently rotatable
+          # from day one rather than accidentally sharing one secret across two
+          # sites' deploy pipelines. REQUIRED, not yet configured as of this PR --
+          # see the PR description.
+          GLOBAL_GDRIVE_CLIENT_ID: ${{ secrets.GLOBAL_GDRIVE_CLIENT_ID }}
+          GLOBAL_GDRIVE_CLIENT_SECRET: ${{ secrets.GLOBAL_GDRIVE_CLIENT_SECRET }}
+          GLOBAL_GDRIVE_REFRESH_TOKEN: ${{ secrets.GLOBAL_GDRIVE_REFRESH_TOKEN }}
+          # Read-scoped PAT/token used to pull hvnglobalco-com's GHCR image, which is
+          # a private package in a different repo -- GITHUB_TOKEN here only has
+          # permissions for THIS repo, so it can't pull that one. REQUIRED, not yet
+          # configured as of this PR -- see the PR description.
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
           # Pass the Doppler-synced Drive creds through to the SSH session so the
           # deploy can write them into the container's runtime env file.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,GLOBAL_GDRIVE_CLIENT_ID,GLOBAL_GDRIVE_CLIENT_SECRET,GLOBAL_GDRIVE_REFRESH_TOKEN,GHCR_READ_TOKEN
           script: |
             set -e
             cd /srv/hvnhavenry
@@ -70,31 +85,55 @@ jobs:
             # with an empty one (e.g. if a secret isn't synced to this workflow).
             touch .env.local
             upsert_env() {
-              key="$1"; val="$2"
+              file="$1"; key="$2"; val="$3"
               [ -z "$val" ] && return 0
-              grep -v "^${key}=" .env.local > .env.local.tmp 2>/dev/null || true
-              printf '%s=%s\n' "$key" "$val" >> .env.local.tmp
-              mv .env.local.tmp .env.local
+              grep -v "^${key}=" "$file" > "$file.tmp" 2>/dev/null || true
+              printf '%s=%s\n' "$key" "$val" >> "$file.tmp"
+              mv "$file.tmp" "$file"
             }
-            upsert_env GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
-            upsert_env GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
-            upsert_env GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+            upsert_env .env.local GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
+            upsert_env .env.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
+            upsert_env .env.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+
+            # HVN Global's own runtime env file -- never .env.local above, per
+            # docs/separation-of-concerns.md in hvnglobalco-com.
+            touch .env.global-preview.local
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_ID "$GLOBAL_GDRIVE_CLIENT_ID"
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_SECRET "$GLOBAL_GDRIVE_CLIENT_SECRET"
+            upsert_env .env.global-preview.local GDRIVE_REFRESH_TOKEN "$GLOBAL_GDRIVE_REFRESH_TOKEN"
 
             docker compose build app
             # force-recreate so the container picks up the refreshed env file and
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
-            # Recreate nginx too so it picks up any nginx.conf changes (the mounted
-            # file changes on git reset but compose won't reload it otherwise).
+
+            # app-global is pulled from GHCR (built by hvnglobalco-com's own CI), not
+            # built here. Log in only if a token was actually provided, so a repo
+            # that hasn't set GHCR_READ_TOKEN yet doesn't fail this whole deploy over
+            # a preview-only service -- app-global simply won't update that run.
+            if [ -n "$GHCR_READ_TOKEN" ]; then
+              echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+              docker compose pull app-global
+            else
+              echo "GHCR_READ_TOKEN not set -- skipping app-global image pull (see PR description)."
+            fi
+            docker compose up -d --no-deps --force-recreate app-global
+
+            # Recreate nginx too so it picks up any nginx.conf/conf.d changes (the
+            # mounted files change on git reset but compose won't reload them
+            # otherwise).
             docker compose up -d --force-recreate nginx
 
             # Observability (safe: prints key NAMES/counts, never values): confirm
-            # the creds landed in the env file, and surface the container's startup
+            # the creds landed in the env files, and surface each app's startup
             # asset-pull result right here in the deploy log.
             echo "GDRIVE keys present in .env.local: $(grep -c '^GDRIVE_' .env.local 2>/dev/null || echo 0)"
+            echo "GDRIVE keys present in .env.global-preview.local: $(grep -c '^GDRIVE_' .env.global-preview.local 2>/dev/null || echo 0)"
             sleep 5
-            echo "----- container assets:pull -----"
+            echo "----- hvnhavenry_app assets:pull -----"
             docker logs hvnhavenry_app 2>&1 | grep -i "assets:pull" | tail -20 || echo "(no assets:pull lines found)"
+            echo "----- hvnhavenry_app_global_preview assets:pull -----"
+            docker logs hvnhavenry_app_global_preview 2>&1 | tail -30 || echo "(container not found/not running)"
             echo "---------------------------------"
 
             docker image prune -f
