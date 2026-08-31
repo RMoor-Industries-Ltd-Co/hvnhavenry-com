@@ -18,7 +18,7 @@ import { useHavenStore } from "@/lib/store";
 const FOOTER_LINKS = {
   Shop: ["Atmos Ritual", "HVN Chamber", "HVN Living", "Standard Line"],
   Company: ["The Room", "Bespoke", "Contact", "Speak to Concierge"],
-  Legal: ["Terms & Conditions", "Shipping & Returns", "Privacy Policy", "Cookie Notice"],
+  Legal: ["Terms & Conditions", "Shipping & Returns", "Privacy Policy", "Cookie Notice", "Accessibility"],
 };
 
 // Footer links that resolve to a real page. Anything not listed stays "#" for now
@@ -30,6 +30,7 @@ const FOOTER_HREFS: Record<string, string> = {
   "Shipping & Returns": "/shipping-returns",
   "Privacy Policy": "/privacy",
   "Cookie Notice": "/cookies",
+  Accessibility: "/accessibility",
 };
 
 if (typeof window !== "undefined") {

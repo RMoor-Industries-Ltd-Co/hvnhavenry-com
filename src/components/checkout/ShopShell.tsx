@@ -70,6 +70,7 @@ export function ShopShell({ children }: { children: ReactNode }) {
             <Link href="/shipping-returns" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Shipping &amp; Returns</Link>
             <Link href="/privacy" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Privacy Policy</Link>
             <Link href="/cookies" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Cookie Notice</Link>
+            <Link href="/accessibility" className="text-[#e8dcc8]/50 hover:text-[#c9a96e] transition-colors">Accessibility</Link>
           </div>
         </div>
       </footer>
