@@ -13,14 +13,20 @@ services:
       - havenry
 
   # HVN Global preview (Phase A) -- rmoor-industries-ltd-co/hvnglobalco-com, a
-  # SEPARATE codebase/repo/CI pipeline, sharing only this physical box. Pulled from
-  # GHCR (that repo builds and pushes it), not built here -- this repo never vendors
-  # or builds hvnglobalco-com's Dockerfile. Its own env file, never hvnhavenry's;
-  # its own Drive folder/manifest; see hvnglobalco-com's docs/separation-of-concerns.md.
-  # `:preview` is always the noindex/no-SSL-required build -- the indexable production
-  # tag is a distinct, later concern (Phase B, not this service).
+  # SEPARATE codebase/repo/CI pipeline, sharing only this physical box and this
+  # deploy mechanism. Built locally from a sibling checkout of that repo, the same
+  # build-from-a-git-checkout approach `app` above already uses -- deliberately not
+  # a separate registry/image-pull pattern; reuse the deployment infrastructure that
+  # already works here, keep the application layer separate (own container, own env
+  # file, own Drive folder/manifest -- see hvnglobalco-com's
+  # docs/separation-of-concerns.md). The sibling checkout is expected at
+  # ../hvnglobalco-com relative to this file (i.e. a directory next to this repo's
+  # own checkout on the server) -- see .github/workflows/deploy.yml for how it gets
+  # there. This build has no ALLOW_INDEXING build-arg set, so it's always the
+  # noindex/no-SSL-required preview build -- the indexable production build is a
+  # distinct, later concern (Phase B, not this service).
   app-global:
-    image: ghcr.io/rmoor-industries-ltd-co/hvnglobalco-com:preview
+    build: ../hvnglobalco-com
     container_name: hvnhavenry_app_global_preview
     restart: unless-stopped
     expose:

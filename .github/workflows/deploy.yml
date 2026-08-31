@@ -61,23 +61,40 @@ jobs:
           GLOBAL_GDRIVE_CLIENT_ID: ${{ secrets.GLOBAL_GDRIVE_CLIENT_ID }}
           GLOBAL_GDRIVE_CLIENT_SECRET: ${{ secrets.GLOBAL_GDRIVE_CLIENT_SECRET }}
           GLOBAL_GDRIVE_REFRESH_TOKEN: ${{ secrets.GLOBAL_GDRIVE_REFRESH_TOKEN }}
-          # Read-scoped PAT/token used to pull hvnglobalco-com's GHCR image, which is
-          # a private package in a different repo -- GITHUB_TOKEN here only has
-          # permissions for THIS repo, so it can't pull that one. REQUIRED, not yet
-          # configured as of this PR -- see the PR description.
-          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
           # Pass the Doppler-synced Drive creds through to the SSH session so the
           # deploy can write them into the container's runtime env file.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,GLOBAL_GDRIVE_CLIENT_ID,GLOBAL_GDRIVE_CLIENT_SECRET,GLOBAL_GDRIVE_REFRESH_TOKEN,GHCR_READ_TOKEN
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,GLOBAL_GDRIVE_CLIENT_ID,GLOBAL_GDRIVE_CLIENT_SECRET,GLOBAL_GDRIVE_REFRESH_TOKEN
           script: |
             set -e
             cd /srv/hvnhavenry
             git fetch origin main
             git reset --hard origin/main
+
+            # HVN Global's app-global service (docker-compose.yml) builds from a
+            # sibling checkout of rmoor-industries-ltd-co/hvnglobalco-com, the same
+            # git-clone-and-build-locally approach `app` above already uses -- reusing
+            # this server's existing deploy mechanism/credentials rather than standing
+            # up a separate registry. Clone once, pull thereafter.
+            #
+            # NOTE: this uses HTTPS, matching a typical org-wide git credential
+            # helper/machine-user token setup. If this server actually authenticates
+            # its `git fetch origin main` above via SSH (deploy key) instead, this
+            # clone needs the equivalent SSH remote URL
+            # (git@github.com:RMoor-Industries-Ltd-Co/hvnglobalco-com.git) instead --
+            # whichever this server already uses for THIS repo's own remote is what
+            # to check first (`git remote -v` in /srv/hvnhavenry) if this step fails
+            # with an auth error. Written from an environment with no server access,
+            # so this could not be confirmed directly.
+            if [ ! -d ../hvnglobalco-com/.git ]; then
+              git clone https://github.com/RMoor-Industries-Ltd-Co/hvnglobalco-com.git ../hvnglobalco-com
+            else
+              git -C ../hvnglobalco-com fetch origin main
+              git -C ../hvnglobalco-com reset --hard origin/main
+            fi
 
             # Ensure the container's runtime env carries the Drive creds so the
             # startup asset-pull runs hands-free. Upsert idempotently, and only
@@ -107,16 +124,9 @@ jobs:
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
 
-            # app-global is pulled from GHCR (built by hvnglobalco-com's own CI), not
-            # built here. Log in only if a token was actually provided, so a repo
-            # that hasn't set GHCR_READ_TOKEN yet doesn't fail this whole deploy over
-            # a preview-only service -- app-global simply won't update that run.
-            if [ -n "$GHCR_READ_TOKEN" ]; then
-              echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-              docker compose pull app-global
-            else
-              echo "GHCR_READ_TOKEN not set -- skipping app-global image pull (see PR description)."
-            fi
+            docker compose build app-global
+            # force-recreate so the container picks up the refreshed env file and
+            # re-runs the startup asset pull on every deploy, same as `app` above.
             docker compose up -d --no-deps --force-recreate app-global
 
             # Recreate nginx too so it picks up any nginx.conf/conf.d changes (the
