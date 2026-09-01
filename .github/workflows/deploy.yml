@@ -72,6 +72,11 @@ jobs:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          # Vale's M2M shared secret, validated by src/lib/agentAuth.ts (x-agent-key ->
+          # AGENT_API_KEY). CI-managed here so the live .env.local always carries it and
+          # ALLIE/ALLEN/Cappo can reach /api/agent*. Does NOT rotate the key — it only
+          # ensures the existing GitHub Actions secret value reaches the server env file.
+          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
           HVN_GLOBAL_APP_TOKEN: ${{ steps.hvn_linode_deploy_token.outputs.token }}
         with:
           host: ${{ secrets.LINODE_HOST }}
@@ -95,7 +100,11 @@ jobs:
           # DOPPLER_TOKEN) -- these are plain GitHub Actions repository secrets.
           # Migrating this workflow to a Doppler-backed secret model is a
           # separate, future infrastructure cleanup, not part of Phase A.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,HVN_GLOBAL_APP_TOKEN
+          #
+          # AGENT_API_KEY is Vale's M2M shared secret (also a plain GitHub Actions
+          # repository secret) — passed through so the upsert below writes it into
+          # Havenry's .env.local and Vale's /api/agent* stops returning 401.
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,HVN_GLOBAL_APP_TOKEN,AGENT_API_KEY
           script: |
             set -e
             cd /srv/hvnhavenry
@@ -141,6 +150,10 @@ jobs:
             upsert_env .env.local GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
             upsert_env .env.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
             upsert_env .env.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+            # Vale's M2M auth key -> Havenry's .env.local (the file Vale's app reads).
+            # Same idempotent upsert: written only when a value is present, never
+            # overwriting a good value with empty.
+            upsert_env .env.local AGENT_API_KEY "$AGENT_API_KEY"
 
             # HVN Global's own runtime env file -- never .env.local above, per
             # docs/separation-of-concerns.md in hvnglobalco-com. Same underlying
@@ -176,6 +189,7 @@ jobs:
             # asset-pull result right here in the deploy log.
             echo "GDRIVE keys present in .env.local: $(grep -c '^GDRIVE_' .env.local 2>/dev/null || echo 0)"
             echo "GDRIVE keys present in .env.global-preview.local: $(grep -c '^GDRIVE_' .env.global-preview.local 2>/dev/null || echo 0)"
+            echo "AGENT_API_KEY present in .env.local: $(grep -c '^AGENT_API_KEY=' .env.local 2>/dev/null || echo 0)"
             sleep 5
             echo "----- hvnhavenry_app assets:pull -----"
             docker logs hvnhavenry_app 2>&1 | grep -i "assets:pull" | tail -20 || echo "(no assets:pull lines found)"
