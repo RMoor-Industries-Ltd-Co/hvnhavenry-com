@@ -4,6 +4,18 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Manual redeploy trigger. hvnglobalco-com has no deploy step of its own -- this
+  # workflow is the only thing that ever rebuilds app-global, and it only pulls a
+  # fresh hvnglobalco-com checkout when THIS workflow runs. Without this, a merge to
+  # hvnglobalco-com's main has no way to reach preview.hvnglobalco.com short of a
+  # dummy commit to this repo. workflow_dispatch lets a human re-run the exact same
+  # deploy (same script, same secrets, same build-both-then-recreate sequence) on
+  # demand from the Actions tab. Deliberately manual, not automated: no
+  # repository_dispatch/webhook from hvnglobalco-com and no new GitHub App
+  # permissions -- see docs/deployment-linode.md in hvnglobalco-com for the current
+  # (manual) preview-refresh operating model; cross-repo automation is a possible
+  # future step, not this one.
+  workflow_dispatch:
 
 # main deploys stay strictly serial and uncancellable; PRs validate in
 # parallel, cancelling their own superseded runs.
@@ -37,8 +49,12 @@ jobs:
   deploy:
     name: Build & deploy
     needs: validate
-    # Validate runs on PRs for pre-merge feedback; only deploy on a push to main.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Validate runs on PRs for pre-merge feedback; deploy on a push to main, or on a
+    # manual workflow_dispatch run (e.g. to refresh app-global after a hvnglobalco-com
+    # merge -- see the workflow_dispatch trigger comment above). Both run the exact
+    # same script against main's current state; workflow_dispatch just lets a human
+    # trigger it without needing a new hvnhavenry-com commit.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
