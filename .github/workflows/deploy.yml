@@ -51,13 +51,18 @@ jobs:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          # Vale's M2M shared secret, validated by src/lib/agentAuth.ts (x-agent-key ->
+          # AGENT_API_KEY). CI-managed here so the live .env.local always carries it and
+          # ALLIE/ALLEN/Cappo can reach /api/agent*. Does NOT rotate the key — it only
+          # ensures the existing GitHub Actions secret value reaches the server env file.
+          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
           # Pass the Doppler-synced Drive creds through to the SSH session so the
           # deploy can write them into the container's runtime env file.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,AGENT_API_KEY
           script: |
             set -e
             cd /srv/hvnhavenry
@@ -79,6 +84,9 @@ jobs:
             upsert_env GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
             upsert_env GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
             upsert_env GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+            # Vale's M2M auth key. Same idempotent upsert: written only when a value is
+            # present, never overwriting a good value with empty.
+            upsert_env AGENT_API_KEY "$AGENT_API_KEY"
 
             docker compose build app
             # force-recreate so the container picks up the refreshed env file and
@@ -92,6 +100,7 @@ jobs:
             # the creds landed in the env file, and surface the container's startup
             # asset-pull result right here in the deploy log.
             echo "GDRIVE keys present in .env.local: $(grep -c '^GDRIVE_' .env.local 2>/dev/null || echo 0)"
+            echo "AGENT_API_KEY present in .env.local: $(grep -c '^AGENT_API_KEY=' .env.local 2>/dev/null || echo 0)"
             sleep 5
             echo "----- container assets:pull -----"
             docker logs hvnhavenry_app 2>&1 | grep -i "assets:pull" | tail -20 || echo "(no assets:pull lines found)"
