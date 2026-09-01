@@ -45,24 +45,86 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # HVN Linode Deploy GitHub App -- installed on hvnhavenry-com + hvnglobalco-com,
+      # Contents:read + Metadata:read only, no webhook. This mints a short-lived
+      # (~1h) installation access token scoped to exactly those two repos, so the
+      # sibling checkout below authenticates as this App rather than depending on
+      # whatever ambient git credential (SSH deploy key / PAT) the server happens to
+      # already have for THIS repo's own remote. Superseds the earlier "not sure if
+      # this server auths via SSH or HTTPS" uncertainty entirely -- this token works
+      # regardless of how /srv/hvnhavenry's own `git fetch origin main` authenticates.
+      - name: Generate HVN Linode Deploy app token
+        id: hvn_linode_deploy_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.HVN_LINODE_DEPLOY_APP_ID }}
+          private-key: ${{ secrets.HVN_LINODE_DEPLOY_PRIVATE_KEY }}
+          owner: RMoor-Industries-Ltd-Co
+          repositories: hvnglobalco-com
+          # HVN_LINODE_DEPLOY_INSTALLATION_ID is stored as a secret but not needed
+          # here -- this action resolves the installation itself from app-id +
+          # owner/repositories. Kept available for a future non-Actions token
+          # mint (e.g. a direct JWT-exchange script) if this action is ever swapped out.
+
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          HVN_GLOBAL_APP_TOKEN: ${{ steps.hvn_linode_deploy_token.outputs.token }}
         with:
           host: ${{ secrets.LINODE_HOST }}
           username: ${{ secrets.LINODE_USER }}
           key: ${{ secrets.LINODE_SSH_KEY }}
-          # Pass the Doppler-synced Drive creds through to the SSH session so the
-          # deploy can write them into the container's runtime env file.
-          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN
+          # Pass the existing GitHub Actions Drive creds through to the SSH session
+          # so the deploy can write them into both apps' runtime env files. Global
+          # reuses the SAME OAuth credential as Havenry (both point at the one
+          # rmasters.group Google Drive OAuth identity, per hvnglobalco-com's
+          # ASSETS.md) -- no separate GLOBAL_GDRIVE_* secret is needed for that.
+          # What keeps the two sites' assets apart is the separate Drive folder +
+          # manifest inside hvnglobalco-com, not a separate credential.
+          #
+          # HVN_GLOBAL_APP_TOKEN (above) is the HVN Linode Deploy GitHub App's
+          # installation token, minted fresh by this job every run and expiring in
+          # ~1h -- it is what clones/pulls hvnglobalco-com below, scoped read-only
+          # to exactly that repo (+ hvnhavenry-com), independent of any personal
+          # SSH key or PAT and revocable by uninstalling the App.
+          #
+          # This repo's deploy does not use Doppler today (no `doppler run`, no
+          # DOPPLER_TOKEN) -- these are plain GitHub Actions repository secrets.
+          # Migrating this workflow to a Doppler-backed secret model is a
+          # separate, future infrastructure cleanup, not part of Phase A.
+          envs: GDRIVE_CLIENT_ID,GDRIVE_CLIENT_SECRET,GDRIVE_REFRESH_TOKEN,HVN_GLOBAL_APP_TOKEN
           script: |
             set -e
             cd /srv/hvnhavenry
             git fetch origin main
             git reset --hard origin/main
+
+            # HVN Global's app-global service (docker-compose.yml) builds from a
+            # sibling checkout of rmoor-industries-ltd-co/hvnglobalco-com, the same
+            # git-clone-and-build-locally approach `app` above already uses -- reusing
+            # this server's existing deploy mechanism rather than standing up a
+            # separate registry. Clone once, pull thereafter.
+            #
+            # Auth: the HVN Linode Deploy GitHub App's installation token
+            # ($HVN_GLOBAL_APP_TOKEN, minted fresh above, Contents:read-only,
+            # ~1h-lived) -- passed as an HTTP Basic auth header for just this
+            # clone/fetch, never persisted into the checkout's remote URL or on-disk
+            # git config, so an expired token left over from a past run can't cause a
+            # confusing stale-auth failure. This replaces the earlier
+            # SSH-vs-HTTPS-ambient-credential guesswork: the App's grant is explicit
+            # and independent of whatever this server already uses for THIS repo's
+            # own `git fetch origin main` above.
+            GLOBAL_REPO_URL="https://github.com/RMoor-Industries-Ltd-Co/hvnglobalco-com.git"
+            GLOBAL_AUTH_HEADER="Authorization: Basic $(printf 'x-access-token:%s' "$HVN_GLOBAL_APP_TOKEN" | base64 -w0)"
+            if [ ! -d ../hvnglobalco-com/.git ]; then
+              git -c http.extraHeader="$GLOBAL_AUTH_HEADER" clone "$GLOBAL_REPO_URL" ../hvnglobalco-com
+            else
+              git -C ../hvnglobalco-com -c http.extraHeader="$GLOBAL_AUTH_HEADER" fetch origin main
+              git -C ../hvnglobalco-com reset --hard origin/main
+            fi
 
             # Ensure the container's runtime env carries the Drive creds so the
             # startup asset-pull runs hands-free. Upsert idempotently, and only
@@ -70,31 +132,55 @@ jobs:
             # with an empty one (e.g. if a secret isn't synced to this workflow).
             touch .env.local
             upsert_env() {
-              key="$1"; val="$2"
+              file="$1"; key="$2"; val="$3"
               [ -z "$val" ] && return 0
-              grep -v "^${key}=" .env.local > .env.local.tmp 2>/dev/null || true
-              printf '%s=%s\n' "$key" "$val" >> .env.local.tmp
-              mv .env.local.tmp .env.local
+              grep -v "^${key}=" "$file" > "$file.tmp" 2>/dev/null || true
+              printf '%s=%s\n' "$key" "$val" >> "$file.tmp"
+              mv "$file.tmp" "$file"
             }
-            upsert_env GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
-            upsert_env GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
-            upsert_env GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+            upsert_env .env.local GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
+            upsert_env .env.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
+            upsert_env .env.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
 
+            # HVN Global's own runtime env file -- never .env.local above, per
+            # docs/separation-of-concerns.md in hvnglobalco-com. Same underlying
+            # GDRIVE_* credential values as .env.local (see the ssh-action env: block
+            # above for why), just written into a separate file so the two apps never
+            # share a config file, even though they share a credential.
+            touch .env.global-preview.local
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_ID "$GDRIVE_CLIENT_ID"
+            upsert_env .env.global-preview.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
+            upsert_env .env.global-preview.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
+
+            # Build BOTH apps before recreating either container. `set -e` means a
+            # failed `docker compose build app-global` exits here -- if that build
+            # ran after `app` was already force-recreated, this deploy would exit
+            # having replaced the live Havenry app but left nginx pointed at the
+            # old config, a partially-applied deploy. Building both first means any
+            # build failure aborts before any container is touched.
             docker compose build app
-            # force-recreate so the container picks up the refreshed env file and
+            docker compose build app-global
+
+            # force-recreate so each container picks up its refreshed env file and
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
-            # Recreate nginx too so it picks up any nginx.conf changes (the mounted
-            # file changes on git reset but compose won't reload it otherwise).
+            docker compose up -d --no-deps --force-recreate app-global
+
+            # Recreate nginx too so it picks up any nginx.conf/conf.d changes (the
+            # mounted files change on git reset but compose won't reload them
+            # otherwise).
             docker compose up -d --force-recreate nginx
 
             # Observability (safe: prints key NAMES/counts, never values): confirm
-            # the creds landed in the env file, and surface the container's startup
+            # the creds landed in the env files, and surface each app's startup
             # asset-pull result right here in the deploy log.
             echo "GDRIVE keys present in .env.local: $(grep -c '^GDRIVE_' .env.local 2>/dev/null || echo 0)"
+            echo "GDRIVE keys present in .env.global-preview.local: $(grep -c '^GDRIVE_' .env.global-preview.local 2>/dev/null || echo 0)"
             sleep 5
-            echo "----- container assets:pull -----"
+            echo "----- hvnhavenry_app assets:pull -----"
             docker logs hvnhavenry_app 2>&1 | grep -i "assets:pull" | tail -20 || echo "(no assets:pull lines found)"
+            echo "----- hvnhavenry_app_global_preview assets:pull -----"
+            docker logs hvnhavenry_app_global_preview 2>&1 | tail -30 || echo "(container not found/not running)"
             echo "---------------------------------"
 
             docker image prune -f

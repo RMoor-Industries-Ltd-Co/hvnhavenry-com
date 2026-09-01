@@ -12,6 +12,30 @@ services:
     networks:
       - havenry
 
+  # HVN Global preview (Phase A) -- rmoor-industries-ltd-co/hvnglobalco-com, a
+  # SEPARATE codebase/repo/CI pipeline, sharing only this physical box and this
+  # deploy mechanism. Built locally from a sibling checkout of that repo, the same
+  # build-from-a-git-checkout approach `app` above already uses -- deliberately not
+  # a separate registry/image-pull pattern; reuse the deployment infrastructure that
+  # already works here, keep the application layer separate (own container, own env
+  # file, own Drive folder/manifest -- see hvnglobalco-com's
+  # docs/separation-of-concerns.md). The sibling checkout is expected at
+  # ../hvnglobalco-com relative to this file (i.e. a directory next to this repo's
+  # own checkout on the server) -- see .github/workflows/deploy.yml for how it gets
+  # there. This build has no ALLOW_INDEXING build-arg set, so it's always the
+  # noindex/no-SSL-required preview build -- the indexable production build is a
+  # distinct, later concern (Phase B, not this service).
+  app-global:
+    build: ../hvnglobalco-com
+    container_name: hvnhavenry_app_global_preview
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file:
+      - .env.global-preview.local
+    networks:
+      - havenry
+
   # Backs Vale's interaction log + scheduled HVN<->AMG report cache (src/lib/db.ts).
   # Nothing else on this site is stateful -- the marketing pages/assets pipeline never
   # touch this database.
@@ -37,9 +61,11 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - app
+      - app-global
     networks:
       - havenry
 
