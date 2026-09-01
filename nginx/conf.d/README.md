@@ -43,10 +43,13 @@ about how this server's existing `hvnhavenry.com` certificate was originally obt
    proven to already work here and this doc's author didn't have access to check.)
 3. Confirm the cert landed: `sudo ls /etc/letsencrypt/live/preview.hvnglobalco.com/`
    should show `fullchain.pem` and `privkey.pem`.
-4. Activate, per `preview-global-https.disabled.conf`'s own header comment:
-   - Replace `preview-global.enabled.conf`'s contents with the port-80
-     redirect block from the top of `preview-global-https.disabled.conf`.
-   - `mv preview-global-https.disabled.conf preview-global-https.enabled.conf`
+4. Activate, per `preview-global-https.disabled.conf`'s own header comment. Run
+   these from the repo root (same directory `docker compose` runs from) — the
+   file paths below are repo-relative, not relative to `nginx/conf.d/`:
+   - Replace `nginx/conf.d/preview-global.enabled.conf`'s contents with the
+     port-80 redirect block from the top of
+     `nginx/conf.d/preview-global-https.disabled.conf`.
+   - `mv nginx/conf.d/preview-global-https.disabled.conf nginx/conf.d/preview-global-https.enabled.conf`
    - `docker compose up -d --force-recreate nginx`
 5. Verify both sites: `curl -I https://hvnhavenry.com` and
    `curl -I https://preview.hvnglobalco.com` should both return successfully.

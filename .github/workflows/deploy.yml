@@ -152,14 +152,18 @@ jobs:
             upsert_env .env.global-preview.local GDRIVE_CLIENT_SECRET "$GDRIVE_CLIENT_SECRET"
             upsert_env .env.global-preview.local GDRIVE_REFRESH_TOKEN "$GDRIVE_REFRESH_TOKEN"
 
+            # Build BOTH apps before recreating either container. `set -e` means a
+            # failed `docker compose build app-global` exits here -- if that build
+            # ran after `app` was already force-recreated, this deploy would exit
+            # having replaced the live Havenry app but left nginx pointed at the
+            # old config, a partially-applied deploy. Building both first means any
+            # build failure aborts before any container is touched.
             docker compose build app
-            # force-recreate so the container picks up the refreshed env file and
+            docker compose build app-global
+
+            # force-recreate so each container picks up its refreshed env file and
             # re-runs the startup asset pull on every deploy.
             docker compose up -d --no-deps --force-recreate app
-
-            docker compose build app-global
-            # force-recreate so the container picks up the refreshed env file and
-            # re-runs the startup asset pull on every deploy, same as `app` above.
             docker compose up -d --no-deps --force-recreate app-global
 
             # Recreate nginx too so it picks up any nginx.conf/conf.d changes (the
